@@ -3,7 +3,7 @@ import { useUserChainInfo, useUserNativeBalance } from "@/modules/query";
 import {
   useUserStakeQuery,
   useCalculateRewardsQuery,
-} from "@/modules/query/contract/chat-dapp-query.hooks";
+} from "@/modules/query";
 
 export function UserPositions() {
   const { account } = useUserChainInfo();

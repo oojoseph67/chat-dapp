@@ -8,7 +8,7 @@ import {
   useStakedAmountQuery,
   useCalculateRewardsQuery,
   useUserStakeQuery,
-} from "@/modules/query/contract/chat-dapp-query.hooks";
+} from "@/modules/query";
 
 export function StakeOverview() {
   const { account } = useUserChainInfo();

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { IoAddOutline } from "react-icons/io5";
 import { useUserChainInfo, useUserNativeBalance } from "@/modules/query";
-import { useMinStakeAmountQuery } from "@/modules/query/contract/chat-dapp-query.hooks";
+import { useMinStakeAmountQuery } from "@/modules/query";
 import { useStakeMutation } from "@/modules/mutation/contract/staking-mutations";
 
 export function StakeForm() {

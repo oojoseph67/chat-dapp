@@ -17,7 +17,7 @@ import {
   useRewardIntervalQuery,
   useRewardTokenQuery,
   useActiveUsersCountQuery,
-} from "@/modules/query/contract/chat-dapp-query.hooks";
+} from "@/modules/query";
 import { WalletWarning } from "@/modules/app/component/wallet-warning";
 import { StakingRequirement } from "@/modules/app/component/staking-requirement";
 

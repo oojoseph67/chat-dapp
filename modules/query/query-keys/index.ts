@@ -19,6 +19,7 @@ export const queryKeys = {
     isActive: (address: string) => ["user", "isActive", address] as const,
     tips: (address: string) => ["user", "tips", address] as const,
     stakedAmountByAddress: (address: string) => ["user", "stakedAmountByAddress", address] as const,
+    allUsersInfo: ["user", "allUsersInfo"] as const,
   },
   contract: {
     owner: ["contract", "owner"] as const,

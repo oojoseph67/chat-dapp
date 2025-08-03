@@ -30,6 +30,7 @@ import {
   getStakedAmountByAddress,
   getUserActivities,
   getUserTips,
+  getAllUsersInfo,
 } from "./chat-dapp-query.contract";
 
 // Contract state query hooks
@@ -381,5 +382,20 @@ export function useUserTipsQuery(address: string) {
     },
     enabled: !!address,
     refetchInterval: 30000, // refetch every 30 seconds
+  });
+}
+
+export function useAllUsersInfoQuery() {
+  return useQuery({
+    queryKey: queryKeys.user.allUsersInfo,
+    queryFn: async (): Promise<Array<{
+      address: string;
+      username: string;
+      stakedAmount: number;
+    }>> => {
+      return await getAllUsersInfo();
+    },
+    // refetchInterval: 30000, // refetch every 30 seconds
+    refetchInterval: 5000,
   });
 }

@@ -346,6 +346,77 @@ export async function getUsernameByAddress({
   return username;
 }
 
+// Get all user information in a single call
+export async function getAllUsersInfo(): Promise<
+  Array<{
+    address: string;
+    username: string;
+    stakedAmount: number;
+  }>
+> {
+  try {
+    const activeUsers = await getActiveUsers();
+
+    if (!activeUsers || activeUsers.length === 0) {
+      return [];
+    }
+
+    // Get all usernames and staked amounts in parallel with fail-safes
+    const userInfoPromises = activeUsers.map(async (address) => {
+      try {
+        const [usernameResult, stakedAmountResult] = await Promise.allSettled([
+          getUsernameByAddress({ address }),
+          getStakedAmountByAddress({ address }),
+        ]);
+
+        const username =
+          usernameResult.status === "fulfilled" && usernameResult.value
+            ? usernameResult.value
+            : address.slice(0, 6) + "...";
+        const stakedAmount =
+          stakedAmountResult.status === "fulfilled"
+            ? stakedAmountResult.value
+            : 0;
+
+        return {
+          address,
+          username,
+          stakedAmount,
+        };
+      } catch (error) {
+        return {
+          address,
+          username: address.slice(0, 6) + "...",
+          stakedAmount: 0,
+        };
+      }
+    });
+
+    const results = await Promise.allSettled(userInfoPromises);
+
+    // Filter out failed results and return successful ones
+    const successfulResults = results
+      .filter(
+        (
+          result
+        ): result is PromiseFulfilledResult<{
+          address: string;
+          username: string;
+          stakedAmount: number;
+        }> => result.status === "fulfilled"
+      )
+      .map((result) => result.value);
+
+    console.log(
+      `Successfully retrieved info for ${successfulResults.length}/${activeUsers.length} users`
+    );
+    return successfulResults;
+  } catch (error) {
+    console.error("Failed to get all users info:", error);
+    return [];
+  }
+}
+
 // New functions based on the contract ABI
 export async function getActiveUsers(): Promise<string[]> {
   const activeUsers = await readContract({
@@ -397,7 +468,7 @@ export async function getStakedAmountByAddress({
     method: "function stakedAmounts(address) view returns (uint256)",
     params: [address],
   });
-  return Number(stakedAmount);
+  return Number(toEther(stakedAmount));
 }
 
 export async function getUserActivities({

@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import {
   IoPeopleOutline,
   IoSearchOutline,
@@ -11,20 +12,24 @@ import {
   IoChatbubbleOutline,
   IoChevronBackOutline,
   IoChevronForwardOutline,
+  IoInformationCircleOutline,
 } from "react-icons/io5";
-import { useUserChainInfo } from "@/modules/query";
 import { WalletWarning } from "@/modules/app/component/wallet-warning";
 import { StakingRequirement } from "@/modules/app/component/staking-requirement";
 import {
+  useUserChainInfo,
   useActiveUsersQuery,
   useUserSentMessagesQuery,
   useUserReceivedMessagesQuery,
   useUsernameByAddressQuery,
-} from "@/modules/query/contract/chat-dapp-query.hooks";
+  useStakedAmountByAddressQuery,
+  useAllUsersInfoQuery,
+} from "@/modules/query";
 
 export default function Friends() {
   const { account } = useUserChainInfo();
   const address = account?.address;
+  const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"friends" | "suggestions">(
@@ -33,28 +38,25 @@ export default function Friends() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  const { data: activeUsers = [] } = useActiveUsersQuery();
+  // Get all users info in a single query
+  const { data: allUsersInfo = [] } = useAllUsersInfoQuery();
+  console.log({ allUsersInfo });
 
-  const allUsers = activeUsers.filter((users) => {
-    return users !== address;
-  });
-
-  // Get usernames for all users - simplified for now
-  const userUsernames = useMemo(() => {
-    return allUsers.map((userAddress) => ({
-      address: userAddress,
-      username: userAddress.slice(0, 6) + "...", // Default fallback
-    }));
-  }, [allUsers]);
+  // Filter out current user and sort by staked amount
+  const sortedUsers = useMemo(() => {
+    return allUsersInfo
+      .filter((user) => user.address !== address)
+      .sort((a, b) => b.stakedAmount - a.stakedAmount);
+  }, [allUsersInfo, address]);
 
   // Filter users based on search query
   const filteredUsers = useMemo(() => {
-    return userUsernames.filter(
+    return sortedUsers.filter(
       (user) =>
         user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.address.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [userUsernames, searchQuery]);
+  }, [sortedUsers, searchQuery]);
 
   // Pagination
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -82,6 +84,14 @@ export default function Friends() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const handleStartMessage = (userAddress: string, username: string) => {
+    router.push(
+      `/messages?recipient=${userAddress}&username=${encodeURIComponent(
+        username
+      )}`
+    );
   };
 
   return (
@@ -174,10 +184,23 @@ export default function Friends() {
                             {friend.address.slice(0, 6)}...
                             {friend.address.slice(-4)}
                           </p>
+                          <div className="flex items-center space-x-1 mt-1">
+                            <IoInformationCircleOutline className="w-3 h-3 text-blue-500" />
+                            <span className="text-xs text-blue-600 dark:text-blue-400">
+                              {friend.stakedAmount > 0
+                                ? `${friend.stakedAmount} tokens staked`
+                                : "No stake"}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      <button className="w-full flex items-center justify-center space-x-1 px-3 py-2 bg-primary text-white text-sm rounded-md hover:bg-primary/90 transition-colors duration-200">
+                      <button
+                        onClick={() =>
+                          handleStartMessage(friend.address, friend.username)
+                        }
+                        className="w-full flex items-center justify-center space-x-1 px-3 py-2 bg-primary text-white text-sm rounded-md hover:bg-primary/90 transition-colors duration-200"
+                      >
                         <IoChatbubbleOutline className="w-4 h-4" />
                         <span>Message</span>
                       </button>
@@ -226,10 +249,23 @@ export default function Friends() {
                             {user.address.slice(0, 6)}...
                             {user.address.slice(-4)}
                           </p>
+                          <div className="flex items-center space-x-1 mt-1">
+                            <IoInformationCircleOutline className="w-3 h-3 text-blue-500" />
+                            <span className="text-xs text-blue-600 dark:text-blue-400">
+                              {user.stakedAmount > 0
+                                ? `${user.stakedAmount} tokens staked`
+                                : "No stake"}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      <button className="w-full flex items-center justify-center space-x-1 px-3 py-2 bg-primary text-white text-sm rounded-md hover:bg-primary/90 transition-colors duration-200">
+                      <button
+                        onClick={() =>
+                          handleStartMessage(user.address, user.username)
+                        }
+                        className="w-full flex items-center justify-center space-x-1 px-3 py-2 bg-primary text-white text-sm rounded-md hover:bg-primary/90 transition-colors duration-200"
+                      >
                         <IoAddOutline className="w-4 h-4" />
                         <span>Send a message</span>
                       </button>

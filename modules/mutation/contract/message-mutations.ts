@@ -10,7 +10,7 @@ import { useUserChainInfo } from "@/modules/query";
 import { client } from "@/utils/configs";
 
 // Message mutations
-export function useSendMessage() {
+export function useSendMessageMutation() {
   const { account } = useUserChainInfo();
   const address = account?.address;
   const queryClient = useQueryClient();
@@ -75,6 +75,10 @@ export function useSendMessage() {
           isEncrypted,
         };
 
+        console.log({ content });
+        console.log({ receiver });
+        console.log({ metadata });
+
         const metadataURI = await upload({
           client: client,
           files: [
@@ -86,17 +90,23 @@ export function useSendMessage() {
           uploadWithoutDirectory: true,
         });
 
+        console.log({ metadataURI });
+
         if (!metadataURI) throw new Error("Failed to upload content to IPFS");
         contentIPFSHash = metadataURI;
       } else {
         throw new Error("Either content or file must be provided");
       }
 
+      console.log({ contentIPFSHash });
+
       const transaction = prepareSendMessage({
         receiver,
         contentIPFSHash,
         isEncrypted,
       });
+
+      console.log({ transaction });
 
       const transactionReceipt = await sendAndConfirmTransaction({
         account,
@@ -144,7 +154,7 @@ export function useSendMessage() {
   });
 }
 
-export function useSendMessageWithTip() {
+export function useSendMessageWithTipMutation() {
   const { account } = useUserChainInfo();
   const address = account?.address;
   const queryClient = useQueryClient();

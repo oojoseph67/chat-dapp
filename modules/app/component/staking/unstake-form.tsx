@@ -4,7 +4,7 @@ import { useUserChainInfo } from "@/modules/query";
 import {
   useStakedAmountQuery,
   useCalculateRewardsQuery,
-} from "@/modules/query/contract/chat-dapp-query.hooks";
+} from "@/modules/query";
 import { useUnstakeMutation } from "@/modules/mutation/contract/staking-mutations";
 
 export function UnstakeForm() {
