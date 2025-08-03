@@ -10,7 +10,7 @@ import {
 import { useUserChainInfo } from "@/modules/query";
 
 // Admin mutations
-export function useSetMinStakeAmount() {
+export function useSetMinStakeAmountMutation() {
   const { account } = useUserChainInfo();
   const address = account?.address;
   const queryClient = useQueryClient();
@@ -59,7 +59,7 @@ export function useSetMinStakeAmount() {
   });
 }
 
-export function useSetRewardRate() {
+export function useSetRewardRateMutation() {
   const { account } = useUserChainInfo();
   const queryClient = useQueryClient();
 
@@ -107,7 +107,7 @@ export function useSetRewardRate() {
   });
 }
 
-export function useSetRewardInterval() {
+export function useSetRewardIntervalMutation() {
   const { account } = useUserChainInfo();
   const queryClient = useQueryClient();
 
@@ -155,7 +155,7 @@ export function useSetRewardInterval() {
   });
 }
 
-export function useWithdrawTokens() {
+export function useWithdrawTokensMutation() {
   const { account } = useUserChainInfo();
   const queryClient = useQueryClient();
 

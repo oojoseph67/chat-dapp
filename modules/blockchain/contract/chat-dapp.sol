@@ -84,18 +84,34 @@ contract Web3SocialChat {
     }
 
     // Staking functions
-    function stake() external payable onlyStakedUsers {
+    function stake() external payable {
         require(msg.value >= minStakeAmount, "Insufficient stake");
+
+        // Ensure the user is staking for the first time
+        if (stakedAmounts[msg.sender] == 0) {
+            activeUsers.push(msg.sender); // Add user to active users list if they stake for the first time
+        }
+
         stakedAmounts[msg.sender] += msg.value;
         userActivities[msg.sender].stakeAmount += msg.value;
         emit UserStaked(msg.sender, msg.value);
     }
 
-    function unstake() external onlyStakedUsers {
-        uint256 amount = stakedAmounts[msg.sender];
-        require(amount > 0, "Nothing staked");
-        stakedAmounts[msg.sender] = 0;
-        userActivities[msg.sender].stakeAmount = 0;
+    function unstake(uint256 amount) external onlyStakedUsers {
+        require(
+            amount <= stakedAmounts[msg.sender],
+            "Insufficient staked balance"
+        );
+        require(amount > 0, "Amount must be greater than zero");
+
+        stakedAmounts[msg.sender] -= amount;
+        userActivities[msg.sender].stakeAmount -= amount;
+
+        // Remove from active users if no stake remains
+        if (stakedAmounts[msg.sender] == 0) {
+            isActiveUser[msg.sender] = false;
+        }
+
         payable(msg.sender).transfer(amount);
         emit UserUnstaked(msg.sender, amount);
     }

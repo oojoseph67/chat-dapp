@@ -33,7 +33,7 @@ import {
 } from "./chat-dapp-query.contract";
 
 // Contract state query hooks
-export function useOwner() {
+export function useOwnerQuery() {
   return useQuery({
     queryKey: queryKeys.contract.owner,
     queryFn: async (): Promise<string> => {
@@ -43,7 +43,7 @@ export function useOwner() {
   });
 }
 
-export function useMinStakeAmount() {
+export function useMinStakeAmountQuery() {
   return useQuery({
     queryKey: queryKeys.contract.minStakeAmount,
     queryFn: async (): Promise<number> => {
@@ -53,7 +53,7 @@ export function useMinStakeAmount() {
   });
 }
 
-export function useRewardRate() {
+export function useRewardRateQuery() {
   return useQuery({
     queryKey: queryKeys.contract.rewardRate,
     queryFn: async (): Promise<number> => {
@@ -63,7 +63,7 @@ export function useRewardRate() {
   });
 }
 
-export function useRewardInterval() {
+export function useRewardIntervalQuery() {
   return useQuery({
     queryKey: queryKeys.contract.rewardInterval,
     queryFn: async (): Promise<number> => {
@@ -73,7 +73,7 @@ export function useRewardInterval() {
   });
 }
 
-export function useRewardToken() {
+export function useRewardTokenQuery() {
   return useQuery({
     queryKey: queryKeys.contract.rewardToken,
     queryFn: async (): Promise<string> => {
@@ -84,7 +84,7 @@ export function useRewardToken() {
 }
 
 // User-specific query hooks
-export function useStakedAmount(address: string) {
+export function useStakedAmountQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.stakedAmount(address),
     queryFn: async (): Promise<number> => {
@@ -95,7 +95,7 @@ export function useStakedAmount(address: string) {
   });
 }
 
-export function useHasUserUsername(address: string) {
+export function useHasUserUsernameQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.hasUsername(address),
     queryFn: async (): Promise<boolean> => {
@@ -106,7 +106,7 @@ export function useHasUserUsername(address: string) {
   });
 }
 
-export function useUserUsername(address: string) {
+export function useUserUsernameQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.username(address),
     queryFn: async (): Promise<string> => {
@@ -117,7 +117,7 @@ export function useUserUsername(address: string) {
   });
 }
 
-export function useUserMessageCount(address: string) {
+export function useUserMessageCountQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.messageCount(address),
     queryFn: async (): Promise<number> => {
@@ -128,7 +128,7 @@ export function useUserMessageCount(address: string) {
   });
 }
 
-export function useUserTipStats(address: string) {
+export function useUserTipStatsQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.tipStats(address),
     queryFn: async (): Promise<{ sent: number; received: number }> => {
@@ -139,7 +139,7 @@ export function useUserTipStats(address: string) {
   });
 }
 
-export function useUserStake(address: string) {
+export function useUserStakeQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.stake(address),
     queryFn: async (): Promise<number> => {
@@ -150,7 +150,7 @@ export function useUserStake(address: string) {
   });
 }
 
-export function useLastActive(address: string) {
+export function useLastActiveQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.lastActive(address),
     queryFn: async (): Promise<number> => {
@@ -161,7 +161,7 @@ export function useLastActive(address: string) {
   });
 }
 
-export function useUserActivity(address: string) {
+export function useUserActivityQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.activity(address),
     queryFn: async (): Promise<{
@@ -178,7 +178,7 @@ export function useUserActivity(address: string) {
   });
 }
 
-export function useUserSentMessages(address: string) {
+export function useUserSentMessagesQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.sentMessages(address),
     queryFn: async (): Promise<number[]> => {
@@ -189,7 +189,7 @@ export function useUserSentMessages(address: string) {
   });
 }
 
-export function useUserReceivedMessages(address: string) {
+export function useUserReceivedMessagesQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.receivedMessages(address),
     queryFn: async (): Promise<number[]> => {
@@ -201,7 +201,7 @@ export function useUserReceivedMessages(address: string) {
 }
 
 // Message query hooks
-export function useMessage(messageId: number) {
+export function useMessageQuery(messageId: number) {
   return useQuery({
     queryKey: queryKeys.messages.message(messageId),
     queryFn: async (): Promise<{
@@ -219,7 +219,7 @@ export function useMessage(messageId: number) {
   });
 }
 
-export function useMessageByIndex(messageId: number) {
+export function useMessageByIndexQuery(messageId: number) {
   return useQuery({
     queryKey: queryKeys.messages.messageByIndex(messageId),
     queryFn: async (): Promise<{
@@ -238,7 +238,7 @@ export function useMessageByIndex(messageId: number) {
 }
 
 // Reward calculation hook
-export function useCalculateRewards(address: string) {
+export function useCalculateRewardsQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.rewards(address),
     queryFn: async (): Promise<number> => {
@@ -250,7 +250,7 @@ export function useCalculateRewards(address: string) {
 }
 
 // Array access query hooks
-export function useUserSentMessageAtIndex(address: string, index: number) {
+export function useUserSentMessageAtIndexQuery(address: string, index: number) {
   return useQuery({
     queryKey: queryKeys.user.sentMessageAtIndex(address, index),
     queryFn: async (): Promise<number> => {
@@ -261,7 +261,10 @@ export function useUserSentMessageAtIndex(address: string, index: number) {
   });
 }
 
-export function useUserReceivedMessageAtIndex(address: string, index: number) {
+export function useUserReceivedMessageAtIndexQuery(
+  address: string,
+  index: number
+) {
   return useQuery({
     queryKey: queryKeys.user.receivedMessageAtIndex(address, index),
     queryFn: async (): Promise<number> => {
@@ -272,7 +275,7 @@ export function useUserReceivedMessageAtIndex(address: string, index: number) {
   });
 }
 
-export function useUserActivityByAddress(address: string) {
+export function useUserActivityByAddressQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.activityByAddress(address),
     queryFn: async (): Promise<{
@@ -289,7 +292,7 @@ export function useUserActivityByAddress(address: string) {
   });
 }
 
-export function useUsernameByAddress(address: string) {
+export function useUsernameByAddressQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.usernameByAddress(address),
     queryFn: async (): Promise<string> => {
@@ -301,7 +304,7 @@ export function useUsernameByAddress(address: string) {
 }
 
 // New React Query hooks for the additional functions
-export function useActiveUsers() {
+export function useActiveUsersQuery() {
   return useQuery({
     queryKey: queryKeys.contract.activeUsers,
     queryFn: async (): Promise<string[]> => {
@@ -311,7 +314,7 @@ export function useActiveUsers() {
   });
 }
 
-export function useIsActiveUser(address: string) {
+export function useIsActiveUserQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.isActive(address),
     queryFn: async (): Promise<boolean> => {
@@ -322,7 +325,7 @@ export function useIsActiveUser(address: string) {
   });
 }
 
-export function useActiveUsersCount() {
+export function useActiveUsersCountQuery() {
   return useQuery({
     queryKey: queryKeys.contract.activeUsersCount,
     queryFn: async (): Promise<number> => {
@@ -332,7 +335,7 @@ export function useActiveUsersCount() {
   });
 }
 
-export function useTotalMessages() {
+export function useTotalMessagesQuery() {
   return useQuery({
     queryKey: queryKeys.contract.totalMessages,
     queryFn: async (): Promise<number> => {
@@ -342,7 +345,7 @@ export function useTotalMessages() {
   });
 }
 
-export function useStakedAmountByAddress(address: string) {
+export function useStakedAmountByAddressQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.stakedAmountByAddress(address),
     queryFn: async (): Promise<number> => {
@@ -353,7 +356,7 @@ export function useStakedAmountByAddress(address: string) {
   });
 }
 
-export function useUserActivities(address: string) {
+export function useUserActivitiesQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.activity(address),
     queryFn: async (): Promise<{
@@ -370,7 +373,7 @@ export function useUserActivities(address: string) {
   });
 }
 
-export function useUserTips(address: string) {
+export function useUserTipsQuery(address: string) {
   return useQuery({
     queryKey: queryKeys.user.tips(address),
     queryFn: async (): Promise<{ sent: number; received: number }> => {

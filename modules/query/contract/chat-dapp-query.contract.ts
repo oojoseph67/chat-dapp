@@ -65,7 +65,7 @@ export async function getStakedAmount({
     method: "function stakedAmounts(address) view returns (uint256)",
     params: [address],
   });
-  return Number(stakedAmount);
+  return Number(toEther(stakedAmount));
 }
 
 export async function hasUserUsername({
@@ -134,7 +134,7 @@ export async function getUserStake({
     method: "function getUserStake(address) view returns (uint256)",
     params: [address],
   });
-  return Number(stake);
+  return Number(toEther(stake));
 }
 
 export async function getLastActive({

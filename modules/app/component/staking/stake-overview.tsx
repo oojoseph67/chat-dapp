@@ -4,24 +4,29 @@ import {
   IoTimeOutline,
 } from "react-icons/io5";
 import { useUserChainInfo, useUserNativeBalance } from "@/modules/query";
-import { 
-  useStakedAmount, 
-  useCalculateRewards,
-  useUserStake 
+import {
+  useStakedAmountQuery,
+  useCalculateRewardsQuery,
+  useUserStakeQuery,
 } from "@/modules/query/contract/chat-dapp-query.hooks";
 
 export function StakeOverview() {
   const { account } = useUserChainInfo();
   const address = account?.address;
   const { balanceData, isBalanceLoading } = useUserNativeBalance();
-  
+
   // Contract data queries
-  const { data: stakedAmount = 0, isLoading: isStakedLoading } = useStakedAmount(address || "");
-  const { data: totalEarned = 0, isLoading: isRewardsLoading } = useCalculateRewards(address || "");
-  const { data: userStake = 0, isLoading: isUserStakeLoading } = useUserStake(address || "");
+  const { data: stakedAmount = 0, isLoading: isStakedLoading } =
+    useStakedAmountQuery(address || "");
+  const { data: totalEarned = 0, isLoading: isRewardsLoading } =
+    useCalculateRewardsQuery(address || "");
+  const { data: userStake = 0, isLoading: isUserStakeLoading } =
+    useUserStakeQuery(address || "");
 
   // Get native balance and symbol
-  const userBalance = balanceData?.displayValue ? parseFloat(balanceData.displayValue) : 0;
+  const userBalance = balanceData?.displayValue
+    ? parseFloat(balanceData.displayValue)
+    : 0;
   const balanceSymbol = balanceData?.symbol || "XFI";
 
   // Calculate staking positions count (if user has staked, they have 1 position)

@@ -4,9 +4,17 @@ import { upload } from "thirdweb/storage";
 import { queryKeys } from "@/modules/query/query-keys";
 import { prepareStake, prepareUnstake } from "./chat-dapp-mutation.contract";
 import { useUserChainInfo } from "@/modules/query";
+import { getContractCustom } from "@/modules/blockchain";
+import { chatContract } from "@/utils/configs";
+import ChatContractABI from "@/modules/blockchain/abi/chat-dapp.json";
+
+const chatContractInterface = getContractCustom({
+  contractAddress: chatContract,
+  abi: ChatContractABI,
+});
 
 // Staking mutations
-export function useStake() {
+export function useStakeMutation() {
   const { account } = useUserChainInfo();
   const address = account?.address;
   const queryClient = useQueryClient();
@@ -17,7 +25,10 @@ export function useStake() {
         throw new Error("No active account found");
       }
 
-      const transaction = prepareStake({ value: toWei(amount.toString()) });
+      const transaction = prepareStake({ amount });
+
+      console.log({ chatContractInterface });
+      console.log({ transaction, amount });
 
       const transactionReceipt = await sendAndConfirmTransaction({
         account,
@@ -61,7 +72,7 @@ export function useStake() {
   });
 }
 
-export function useUnstake() {
+export function useUnstakeMutation() {
   const { account } = useUserChainInfo();
   const address = account?.address;
   const queryClient = useQueryClient();

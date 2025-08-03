@@ -60,7 +60,7 @@ export const chain1Mainnet = defineChain({
   },
 });
 
-export const chatContractTestnet = "0x658725Eb5B06C97D57f322822Ab931403BFa6289";
+export const chatContractTestnet = "0x4C881448fF2520237A21754671358CCd3B7EA6c8";
 export const chatContractMainnet = "";
 
 export const usdtContractTestnet = "0xc89016a86ccEE9365e893f294f74E81a5A3AB559";

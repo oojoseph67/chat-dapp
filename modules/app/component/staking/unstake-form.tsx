@@ -2,19 +2,19 @@ import { useState } from "react";
 import { IoRemoveOutline } from "react-icons/io5";
 import { useUserChainInfo } from "@/modules/query";
 import {
-  useStakedAmount,
-  useCalculateRewards,
+  useStakedAmountQuery,
+  useCalculateRewardsQuery,
 } from "@/modules/query/contract/chat-dapp-query.hooks";
-import { useUnstake } from "@/modules/mutation/contract/staking-mutations";
+import { useUnstakeMutation } from "@/modules/mutation/contract/staking-mutations";
 
 export function UnstakeForm() {
   const { account } = useUserChainInfo();
   const address = account?.address;
   const { data: stakedAmount = 0, isLoading: isStakedLoading } =
-    useStakedAmount(address || "");
+    useStakedAmountQuery(address || "");
   const { data: totalEarned = 0, isLoading: isRewardsLoading } =
-    useCalculateRewards(address || "");
-  const unstakeMutation = useUnstake();
+    useCalculateRewardsQuery(address || "");
+  const unstakeMutation = useUnstakeMutation();
 
   const [unstakeAmount, setUnstakeAmount] = useState("");
 

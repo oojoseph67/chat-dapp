@@ -1,18 +1,19 @@
 import { IoWalletOutline } from "react-icons/io5";
 import { useUserChainInfo, useUserNativeBalance } from "@/modules/query";
 import {
-  useUserStake,
-  useCalculateRewards,
+  useUserStakeQuery,
+  useCalculateRewardsQuery,
 } from "@/modules/query/contract/chat-dapp-query.hooks";
 
 export function UserPositions() {
   const { account } = useUserChainInfo();
+
   const address = account?.address;
   const { balanceData } = useUserNativeBalance();
-  const { data: userStake = 0, isLoading: isUserStakeLoading } = useUserStake(
-    address || ""
-  );
-  const { data: totalEarned = 0 } = useCalculateRewards(address || "");
+
+  const { data: userStake = 0, isLoading: isUserStakeLoading } =
+    useUserStakeQuery(address || "");
+  const { data: totalEarned = 0 } = useCalculateRewardsQuery(address || "");
 
   // Get balance symbol
   const balanceSymbol = balanceData?.symbol || "XFI";

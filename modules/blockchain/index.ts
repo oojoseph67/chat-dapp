@@ -31,6 +31,7 @@ export function getContractCustom({
       client,
       chain: chainInfo,
       address: contractAddress,
+      abi: abi,
     });
   }
 

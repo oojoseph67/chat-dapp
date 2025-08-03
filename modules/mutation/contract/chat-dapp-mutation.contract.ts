@@ -1,4 +1,8 @@
-import { prepareContractCall, sendAndConfirmTransaction } from "thirdweb";
+import {
+  prepareContractCall,
+  sendAndConfirmTransaction,
+  toWei,
+} from "thirdweb";
 import { getContractCustom } from "@/modules/blockchain";
 import { chatContract } from "@/utils/configs";
 import ChatContractABI from "@/modules/blockchain/abi/chat-dapp.json";
@@ -9,12 +13,12 @@ const chatContractInterface = getContractCustom({
 });
 
 // Staking functions
-export function prepareStake({ value }: { value: bigint }) {
+export function prepareStake({ amount }: { amount: number }) {
   return prepareContractCall({
     contract: chatContractInterface,
     method: "function stake() payable",
     params: [],
-    value,
+    value: toWei(amount.toString()),
   });
 }
 
@@ -36,36 +40,38 @@ export function prepareSetUsername({ username }: { username: string }) {
 }
 
 // Message functions
-export function prepareSendMessage({ 
-  receiver, 
-  contentIPFSHash, 
-  isEncrypted 
-}: { 
-  receiver: string; 
-  contentIPFSHash: string; 
-  isEncrypted: boolean; 
+export function prepareSendMessage({
+  receiver,
+  contentIPFSHash,
+  isEncrypted,
+}: {
+  receiver: string;
+  contentIPFSHash: string;
+  isEncrypted: boolean;
 }) {
   return prepareContractCall({
     contract: chatContractInterface,
-    method: "function sendMessage(address receiver, string contentIPFSHash, bool isEncrypted)",
+    method:
+      "function sendMessage(address receiver, string contentIPFSHash, bool isEncrypted)",
     params: [receiver, contentIPFSHash, isEncrypted],
   });
 }
 
-export function prepareSendMessageWithTip({ 
-  receiver, 
-  contentIPFSHash, 
+export function prepareSendMessageWithTip({
+  receiver,
+  contentIPFSHash,
   isEncrypted,
-  value
-}: { 
-  receiver: string; 
-  contentIPFSHash: string; 
-  isEncrypted: boolean; 
+  value,
+}: {
+  receiver: string;
+  contentIPFSHash: string;
+  isEncrypted: boolean;
   value: bigint;
 }) {
   return prepareContractCall({
     contract: chatContractInterface,
-    method: "function sendMessageWithTip(address receiver, string contentIPFSHash, bool isEncrypted) payable",
+    method:
+      "function sendMessageWithTip(address receiver, string contentIPFSHash, bool isEncrypted) payable",
     params: [receiver, contentIPFSHash, isEncrypted],
     value,
   });
@@ -97,7 +103,11 @@ export function prepareSetRewardRate({ newRate }: { newRate: number }) {
   });
 }
 
-export function prepareSetRewardInterval({ newInterval }: { newInterval: number }) {
+export function prepareSetRewardInterval({
+  newInterval,
+}: {
+  newInterval: number;
+}) {
   return prepareContractCall({
     contract: chatContractInterface,
     method: "function setRewardInterval(uint256 newInterval)",
@@ -105,12 +115,12 @@ export function prepareSetRewardInterval({ newInterval }: { newInterval: number 
   });
 }
 
-export function prepareWithdrawTokens({ 
-  tokenAddress, 
-  amount 
-}: { 
-  tokenAddress: string; 
-  amount: number; 
+export function prepareWithdrawTokens({
+  tokenAddress,
+  amount,
+}: {
+  tokenAddress: string;
+  amount: number;
 }) {
   return prepareContractCall({
     contract: chatContractInterface,

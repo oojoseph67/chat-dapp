@@ -209,7 +209,13 @@
         "type": "event"
     },
     {
-        "inputs": [],
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
         "name": "unstake",
         "outputs": [],
         "stateMutability": "nonpayable",

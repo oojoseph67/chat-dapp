@@ -5,7 +5,7 @@ import { prepareClaimRewards } from "./chat-dapp-mutation.contract";
 import { useUserChainInfo } from "@/modules/query";
 
 // Reward mutations
-export function useClaimRewards() {
+export function useClaimRewardsMutation() {
   const { account } = useUserChainInfo();
   const address = account?.address;
   const queryClient = useQueryClient();

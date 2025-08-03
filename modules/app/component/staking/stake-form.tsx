@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { IoAddOutline } from "react-icons/io5";
 import { useUserChainInfo, useUserNativeBalance } from "@/modules/query";
-import { useMinStakeAmount } from "@/modules/query/contract/chat-dapp-query.hooks";
-import { useStake } from "@/modules/mutation/contract/staking-mutations";
+import { useMinStakeAmountQuery } from "@/modules/query/contract/chat-dapp-query.hooks";
+import { useStakeMutation } from "@/modules/mutation/contract/staking-mutations";
 
 export function StakeForm() {
   const { account } = useUserChainInfo();
@@ -10,8 +10,8 @@ export function StakeForm() {
 
   const { balanceData, isBalanceLoading } = useUserNativeBalance();
   const { data: minStakeAmount = 0, isLoading: isMinStakeLoading } =
-    useMinStakeAmount();
-  const stakeMutation = useStake();
+    useMinStakeAmountQuery();
+  const stakeMutation = useStakeMutation();
 
   const [stakeAmount, setStakeAmount] = useState("");
 
@@ -23,8 +23,17 @@ export function StakeForm() {
 
   const handleStake = () => {
     if (!stakeAmount || parseFloat(stakeAmount) <= 0) return;
-    stakeMutation.mutate({ amount: parseFloat(stakeAmount) });
-    setStakeAmount("");
+    stakeMutation.mutate(
+      { amount: parseFloat(stakeAmount) },
+      {
+        onSuccess() {
+          setStakeAmount("");
+        },
+        onError() {
+          setStakeAmount("");
+        },
+      }
+    );
   };
 
   return (
