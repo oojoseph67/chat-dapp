@@ -11,6 +11,7 @@ import {
 } from "react-icons/io5";
 import { useUserChainInfo } from "@/modules/query";
 import { WalletWarning } from "@/modules/app/component/wallet-warning";
+import { StakingRequirement } from "@/modules/app/component/staking-requirement";
 
 export default function Analytics() {
   const { account } = useUserChainInfo();
@@ -98,7 +99,8 @@ export default function Analytics() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <StakingRequirement>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Head>
         <title>Analytics - FriendFi</title>
         <meta name="description" content="Track your engagement, platform performance, and activity on FriendFi." />
@@ -308,6 +310,7 @@ export default function Analytics() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </StakingRequirement>
   );
 }

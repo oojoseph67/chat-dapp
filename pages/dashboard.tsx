@@ -19,6 +19,7 @@ import {
   useActiveUsersCountQuery,
 } from "@/modules/query/contract/chat-dapp-query.hooks";
 import { WalletWarning } from "@/modules/app/component/wallet-warning";
+import { StakingRequirement } from "@/modules/app/component/staking-requirement";
 
 export default function Dashboard() {
   const { account } = useUserChainInfo();
@@ -80,7 +81,8 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <StakingRequirement>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Head>
         <title>FriendFi Dashboard - Your FriendFi Account Overview</title>
         <meta
@@ -443,6 +445,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </StakingRequirement>
   );
 }

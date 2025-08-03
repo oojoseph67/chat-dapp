@@ -12,6 +12,7 @@ import {
 } from "react-icons/io5";
 import { useUserChainInfo } from "@/modules/query";
 import { WalletWarning } from "@/modules/app/component/wallet-warning";
+import { StakingRequirement } from "@/modules/app/component/staking-requirement";
 
 export default function Friends() {
   const { account } = useUserChainInfo();
@@ -70,7 +71,8 @@ export default function Friends() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <StakingRequirement>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Head>
         <title>Friends - FriendFi</title>
         <meta name="description" content="Manage your friends and discover new people on FriendFi." />
@@ -251,6 +253,7 @@ export default function Friends() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </StakingRequirement>
   );
 }

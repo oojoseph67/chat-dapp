@@ -34,7 +34,7 @@ export function prepareUnstake() {
 export function prepareSetUsername({ username }: { username: string }) {
   return prepareContractCall({
     contract: chatContractInterface,
-    method: "function setUsername(string username)",
+    method: "function setUsername(string calldata username)",
     params: [username],
   });
 }

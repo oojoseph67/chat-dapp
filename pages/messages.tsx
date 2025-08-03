@@ -14,6 +14,7 @@ import {
 } from "react-icons/io5";
 import { useUserChainInfo } from "@/modules/query";
 import { WalletWarning } from "@/modules/app/component/wallet-warning";
+import { StakingRequirement } from "@/modules/app/component/staking-requirement";
 
 export default function Messages() {
   const { account } = useUserChainInfo();
@@ -112,7 +113,8 @@ export default function Messages() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto h-[calc(100vh-200px)]">
+    <StakingRequirement>
+      <div className="max-w-7xl mx-auto h-[calc(100vh-200px)]">
       <Head>
         <title>Messages - FriendFi</title>
         <meta name="description" content="Send and receive encrypted messages with your friends on FriendFi." />
@@ -312,6 +314,7 @@ export default function Messages() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </StakingRequirement>
   );
 }

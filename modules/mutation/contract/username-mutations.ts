@@ -5,7 +5,7 @@ import { prepareSetUsername } from "./chat-dapp-mutation.contract";
 import { useUserChainInfo } from "@/modules/query";
 
 // Username mutations
-export function useSetUsername() {
+export function useSetUsernameMutation() {
   const { account } = useUserChainInfo();
   const address = account?.address;
   const queryClient = useQueryClient();
@@ -16,7 +16,10 @@ export function useSetUsername() {
         throw new Error("No active account found");
       }
 
+      console.log({ username });
+
       const transaction = prepareSetUsername({ username });
+      console.log({ transaction });
 
       const transactionReceipt = await sendAndConfirmTransaction({
         account,
