@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { sendAndConfirmTransaction } from "thirdweb";
+import { sendAndConfirmTransaction, toWei } from "thirdweb";
 import { upload } from "thirdweb/storage";
 import { queryKeys } from "@/modules/query/query-keys";
 import { prepareStake, prepareUnstake } from "./chat-dapp-mutation.contract";
@@ -12,12 +12,12 @@ export function useStake() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ amount }: { amount: number }) => {
       if (!account) {
         throw new Error("No active account found");
       }
 
-      const transaction = prepareStake();
+      const transaction = prepareStake({ value: toWei(amount.toString()) });
 
       const transactionReceipt = await sendAndConfirmTransaction({
         account,
@@ -67,7 +67,7 @@ export function useUnstake() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ amount }: { amount: number }) => {
       if (!account) {
         throw new Error("No active account found");
       }

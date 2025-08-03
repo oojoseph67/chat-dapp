@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Head from "next/head";
 import {
   IoChatbubbleOutline,
   IoSearchOutline,
@@ -9,6 +10,7 @@ import {
   IoTimeOutline,
   IoEllipsisVerticalOutline,
   IoWalletOutline,
+  IoCheckmarkDoneOutline,
 } from "react-icons/io5";
 import { useUserChainInfo } from "@/modules/query";
 import { WalletWarning } from "@/modules/app/component/wallet-warning";
@@ -111,6 +113,12 @@ export default function Messages() {
 
   return (
     <div className="max-w-7xl mx-auto h-[calc(100vh-200px)]">
+      <Head>
+        <title>Messages - FriendFi</title>
+        <meta name="description" content="Send and receive encrypted messages with your friends on FriendFi." />
+        <meta name="keywords" content="messages, chat, encrypted, friends, communication, FriendFi" />
+        <meta name="author" content="FriendFi" />
+      </Head>
       {!address && (
         <WalletWarning 
           title="Connect Your Wallet"

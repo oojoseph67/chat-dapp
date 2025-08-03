@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Head from "next/head";
 import Link from "next/link";
 import {
   IoRocketOutline,
@@ -13,6 +14,20 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <Head>
+        <title>FriendFi - Web3 Social Platform</title>
+        <meta name="description" content="The revolutionary Web3 social platform where meaningful connections meet blockchain technology. Stake tokens, earn rewards, and build genuine friendships in a secure, decentralized environment." />
+        <meta name="keywords" content="Web3, blockchain, social, platform, staking, rewards, decentralized, secure, messaging" />
+        <meta name="author" content="FriendFi" />
+        <meta property="og:title" content="FriendFi - Web3 Social Platform" />
+        <meta property="og:description" content="The revolutionary Web3 social platform where meaningful connections meet blockchain technology. Stake tokens, earn rewards, and build genuine friendships in a secure, decentralized environment." />
+        <meta property="og:image" content="/logo.png" />
+        <meta property="og:url" content="https://friendfi.com" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="FriendFi - Web3 Social Platform" />
+        <meta name="twitter:description" content="The revolutionary Web3 social platform where meaningful connections meet blockchain technology. Stake tokens, earn rewards, and build genuine friendships in a secure, decentralized environment." />
+        <meta name="twitter:image" content="/logo.png" />
+      </Head>
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">

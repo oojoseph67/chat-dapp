@@ -24,7 +24,7 @@ export async function getMinStakeAmount(): Promise<number> {
     method: "function minStakeAmount() view returns (uint256)",
     params: [],
   });
-  return Number(minStakeAmount);
+  return Number(toEther(minStakeAmount));
 }
 
 export async function getRewardRate(): Promise<number> {

@@ -9,11 +9,12 @@ const chatContractInterface = getContractCustom({
 });
 
 // Staking functions
-export function prepareStake() {
+export function prepareStake({ value }: { value: bigint }) {
   return prepareContractCall({
     contract: chatContractInterface,
     method: "function stake() payable",
     params: [],
+    value,
   });
 }
 

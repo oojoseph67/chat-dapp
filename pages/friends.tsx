@@ -1,12 +1,14 @@
 import { useState } from "react";
+import Head from "next/head";
 import {
   IoPeopleOutline,
   IoSearchOutline,
   IoAddOutline,
-  IoChatbubbleOutline,
+  IoRemoveOutline,
   IoCheckmarkOutline,
   IoCloseOutline,
   IoWalletOutline,
+  IoChatbubbleOutline,
 } from "react-icons/io5";
 import { useUserChainInfo } from "@/modules/query";
 import { WalletWarning } from "@/modules/app/component/wallet-warning";
@@ -69,6 +71,12 @@ export default function Friends() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <Head>
+        <title>Friends - FriendFi</title>
+        <meta name="description" content="Manage your friends and discover new people on FriendFi." />
+        <meta name="keywords" content="friends, social, blockchain, web3" />
+        <meta name="author" content="FriendFi" />
+      </Head>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Friends
