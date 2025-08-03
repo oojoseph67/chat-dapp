@@ -39,11 +39,11 @@ const navItems = [
     href: "/analytics",
     icon: IoStatsChartOutline,
   },
-  {
-    name: "Settings",
-    href: "/settings",
-    icon: IoSettingsOutline,
-  },
+  // {
+  //   name: "Settings",
+  //   href: "/settings",
+  //   icon: IoSettingsOutline,
+  // },
 ];
 
 interface SidebarProps {

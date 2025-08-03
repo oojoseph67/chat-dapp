@@ -4,6 +4,7 @@ import {
   useUserStakeQuery,
 } from "@/modules/query";
 import Link from "next/link";
+import Head from "next/head";
 import { IoWalletOutline, IoArrowForwardOutline } from "react-icons/io5";
 
 interface StakingRequirementProps {
@@ -23,7 +24,14 @@ export function StakingRequirement({ children }: StakingRequirementProps) {
   // If no wallet is connected, show wallet warning
   if (!address) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <>
+        <Head>
+          <title>Connect Wallet - FriendFi</title>
+          <meta name="description" content="Please connect your wallet to access FriendFi features." />
+          <meta name="keywords" content="wallet, connect, FriendFi" />
+          <meta name="author" content="FriendFi" />
+        </Head>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 text-center">
           <IoWalletOutline className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
@@ -34,13 +42,21 @@ export function StakingRequirement({ children }: StakingRequirementProps) {
           </p>
         </div>
       </div>
+      </>
     );
   }
 
   // If loading, show loading state
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <>
+        <Head>
+          <title>Loading - FriendFi</title>
+          <meta name="description" content="Checking staking status..." />
+          <meta name="keywords" content="loading, staking, FriendFi" />
+          <meta name="author" content="FriendFi" />
+        </Head>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-300">
@@ -48,13 +64,21 @@ export function StakingRequirement({ children }: StakingRequirementProps) {
           </p>
         </div>
       </div>
+      </>
     );
   }
 
   // If user is not active (no stake), show staking requirement message
   if (!isActiveUser) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <>
+        <Head>
+          <title>Staking Required - FriendFi</title>
+          <meta name="description" content="You need to have an active stake to access this feature." />
+          <meta name="keywords" content="staking, required, FriendFi" />
+          <meta name="author" content="FriendFi" />
+        </Head>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-8 text-center">
           <div className="max-w-md mx-auto">
             <IoWalletOutline className="w-16 h-16 text-blue-500 mx-auto mb-6" />
@@ -76,6 +100,7 @@ export function StakingRequirement({ children }: StakingRequirementProps) {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
