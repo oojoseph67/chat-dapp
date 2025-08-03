@@ -54,16 +54,19 @@ export function prepareSendMessage({
 export function prepareSendMessageWithTip({ 
   receiver, 
   contentIPFSHash, 
-  isEncrypted 
+  isEncrypted,
+  value
 }: { 
   receiver: string; 
   contentIPFSHash: string; 
   isEncrypted: boolean; 
+  value: bigint;
 }) {
   return prepareContractCall({
     contract: chatContractInterface,
     method: "function sendMessageWithTip(address receiver, string contentIPFSHash, bool isEncrypted) payable",
     params: [receiver, contentIPFSHash, isEncrypted],
+    value,
   });
 }
 

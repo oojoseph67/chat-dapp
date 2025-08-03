@@ -1,5 +1,31 @@
 export const queryKeys = {
   user: {
     user: ["user"] as const,
+    stakedAmount: (address: string) => ["user", "stakedAmount", address] as const,
+    hasUsername: (address: string) => ["user", "hasUsername", address] as const,
+    username: (address: string) => ["user", "username", address] as const,
+    messageCount: (address: string) => ["user", "messageCount", address] as const,
+    tipStats: (address: string) => ["user", "tipStats", address] as const,
+    stake: (address: string) => ["user", "stake", address] as const,
+    lastActive: (address: string) => ["user", "lastActive", address] as const,
+    activity: (address: string) => ["user", "activity", address] as const,
+    sentMessages: (address: string) => ["user", "sentMessages", address] as const,
+    receivedMessages: (address: string) => ["user", "receivedMessages", address] as const,
+    rewards: (address: string) => ["user", "rewards", address] as const,
+    sentMessageAtIndex: (address: string, index: number) => ["user", "sentMessageAtIndex", address, index] as const,
+    receivedMessageAtIndex: (address: string, index: number) => ["user", "receivedMessageAtIndex", address, index] as const,
+    activityByAddress: (address: string) => ["user", "activityByAddress", address] as const,
+    usernameByAddress: (address: string) => ["user", "usernameByAddress", address] as const,
+  },
+  contract: {
+    owner: ["contract", "owner"] as const,
+    minStakeAmount: ["contract", "minStakeAmount"] as const,
+    rewardRate: ["contract", "rewardRate"] as const,
+    rewardInterval: ["contract", "rewardInterval"] as const,
+    rewardToken: ["contract", "rewardToken"] as const,
+  },
+  messages: {
+    message: (messageId: number) => ["messages", "message", messageId] as const,
+    messageByIndex: (messageId: number) => ["messages", "messageByIndex", messageId] as const,
   },
 };
