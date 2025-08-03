@@ -16,6 +16,9 @@ export const queryKeys = {
     receivedMessageAtIndex: (address: string, index: number) => ["user", "receivedMessageAtIndex", address, index] as const,
     activityByAddress: (address: string) => ["user", "activityByAddress", address] as const,
     usernameByAddress: (address: string) => ["user", "usernameByAddress", address] as const,
+    isActive: (address: string) => ["user", "isActive", address] as const,
+    tips: (address: string) => ["user", "tips", address] as const,
+    stakedAmountByAddress: (address: string) => ["user", "stakedAmountByAddress", address] as const,
   },
   contract: {
     owner: ["contract", "owner"] as const,
@@ -23,6 +26,9 @@ export const queryKeys = {
     rewardRate: ["contract", "rewardRate"] as const,
     rewardInterval: ["contract", "rewardInterval"] as const,
     rewardToken: ["contract", "rewardToken"] as const,
+    activeUsers: ["contract", "activeUsers"] as const,
+    activeUsersCount: ["contract", "activeUsersCount"] as const,
+    totalMessages: ["contract", "totalMessages"] as const,
   },
   messages: {
     message: (messageId: number) => ["messages", "message", messageId] as const,

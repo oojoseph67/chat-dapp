@@ -6,48 +6,66 @@ import {
   IoChatbubbleOutline,
   IoCheckmarkOutline,
   IoCloseOutline,
+  IoWalletOutline,
 } from "react-icons/io5";
+import { useUserChainInfo } from "@/modules/query";
+import { WalletWarning } from "@/modules/app/component/wallet-warning";
 
 export default function Friends() {
+  const { account } = useUserChainInfo();
+  const address = account?.address;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<
     "friends" | "requests" | "suggestions"
   >("friends");
 
-  const [friends] = useState([
-    {
-      id: 1,
-      name: "CryptoAlice",
-      avatar: "CA",
-      status: "online",
-      mutualFriends: 5,
-    },
-    {
-      id: 2,
-      name: "DeFiBob",
-      avatar: "DB",
-      status: "offline",
-      mutualFriends: 3,
-    },
-  ]);
+  const [friends] = useState(
+    address
+      ? [
+          {
+            id: 1,
+            name: "CryptoAlice",
+            avatar: "CA",
+            status: "online",
+            mutualFriends: 5,
+          },
+          {
+            id: 2,
+            name: "DeFiBob",
+            avatar: "DB",
+            status: "offline",
+            mutualFriends: 3,
+          },
+        ]
+      : []
+  );
 
-  const [friendRequests] = useState([
-    {
-      id: 1,
-      name: "Web3Emma",
-      avatar: "WE",
-      mutualFriends: 4,
-    },
-  ]);
+  const [friendRequests] = useState(
+    address
+      ? [
+          {
+            id: 1,
+            name: "Web3Emma",
+            avatar: "WE",
+            mutualFriends: 4,
+          },
+        ]
+      : []
+  );
 
-  const [suggestions] = useState([
-    {
-      id: 1,
-      name: "NFTGrace",
-      avatar: "NG",
-      mutualFriends: 6,
-    },
-  ]);
+  const [suggestions] = useState(
+    address
+      ? [
+          {
+            id: 1,
+            name: "NFTGrace",
+            avatar: "NG",
+            mutualFriends: 6,
+          },
+        ]
+      : []
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -59,6 +77,13 @@ export default function Friends() {
           Connect with friends and discover new people on FriendFi.
         </p>
       </div>
+
+      {!address && (
+        <WalletWarning 
+          title="Connect Your Wallet"
+          message="Please connect your wallet to view your friends and manage connections."
+        />
+      )}
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">

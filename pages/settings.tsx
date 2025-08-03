@@ -9,8 +9,13 @@ import {
   IoLanguageOutline,
   IoLogOutOutline,
 } from "react-icons/io5";
+import { useUserChainInfo } from "@/modules/query";
+import { WalletWarning } from "@/modules/app/component/wallet-warning";
 
 export default function Settings() {
+  const { account } = useUserChainInfo();
+  const address = account?.address;
+  
   const [activeTab, setActiveTab] = useState("profile");
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
@@ -39,6 +44,13 @@ export default function Settings() {
           Manage your account preferences and security settings.
         </p>
       </div>
+
+      {!address && (
+        <WalletWarning 
+          title="Connect Your Wallet"
+          message="Please connect your wallet to access settings and manage your account."
+        />
+      )}
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
         <div className="flex flex-col lg:flex-row">

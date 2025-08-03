@@ -345,3 +345,100 @@ export async function getUsernameByAddress({
   });
   return username;
 }
+
+// New functions based on the contract ABI
+export async function getActiveUsers(): Promise<string[]> {
+  const activeUsers = await readContract({
+    contract: chatContractInterface,
+    method: "function getActiveUsers() view returns (address[])",
+    params: [],
+  });
+  return Array.from(activeUsers);
+}
+
+export async function isActiveUser({
+  address,
+}: {
+  address: string;
+}): Promise<boolean> {
+  const isActive = await readContract({
+    contract: chatContractInterface,
+    method: "function isActiveUser(address) view returns (bool)",
+    params: [address],
+  });
+  return isActive;
+}
+
+export async function getActiveUsersCount(): Promise<number> {
+  const activeUsers = await readContract({
+    contract: chatContractInterface,
+    method: "function getActiveUsers() view returns (address[])",
+    params: [],
+  });
+  return activeUsers.length;
+}
+
+export async function getTotalMessages(): Promise<number> {
+  const messages = await readContract({
+    contract: chatContractInterface,
+    method: "function messages() view returns (uint256)",
+    params: [],
+  });
+  return Number(messages);
+}
+
+export async function getStakedAmountByAddress({
+  address,
+}: {
+  address: string;
+}): Promise<number> {
+  const stakedAmount = await readContract({
+    contract: chatContractInterface,
+    method: "function stakedAmounts(address) view returns (uint256)",
+    params: [address],
+  });
+  return Number(stakedAmount);
+}
+
+export async function getUserActivities({
+  address,
+}: {
+  address: string;
+}): Promise<{
+  messageCount: number;
+  tipSent: number;
+  tipReceived: number;
+  lastActive: number;
+  stakeAmount: number;
+}> {
+  const activities = await readContract({
+    contract: chatContractInterface,
+    method:
+      "function userActivities(address) view returns (uint256 messageCount, uint256 tipSent, uint256 tipReceived, uint256 lastActive, uint256 stakeAmount)",
+    params: [address],
+  });
+  return {
+    messageCount: Number(activities[0]),
+    tipSent: Number(activities[1]),
+    tipReceived: Number(activities[2]),
+    lastActive: Number(activities[3]),
+    stakeAmount: Number(activities[4]),
+  };
+}
+
+export async function getUserTips({
+  address,
+}: {
+  address: string;
+}): Promise<{ sent: number; received: number }> {
+  const tips = await readContract({
+    contract: chatContractInterface,
+    method:
+      "function getUserTipStats(address) view returns (uint256 sent, uint256 received)",
+    params: [address],
+  });
+  return {
+    sent: Number(tips[0]),
+    received: Number(tips[1]),
+  };
+}

@@ -8,14 +8,20 @@ import {
   IoHeartOutline,
   IoTimeOutline,
   IoEllipsisVerticalOutline,
+  IoWalletOutline,
 } from "react-icons/io5";
+import { useUserChainInfo } from "@/modules/query";
+import { WalletWarning } from "@/modules/app/component/wallet-warning";
 
 export default function Messages() {
+  const { account } = useUserChainInfo();
+  const address = account?.address;
+  
   const [selectedFriend, setSelectedFriend] = useState(1);
   const [message, setMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [friends] = useState([
+  const [friends] = useState(address ? [
     {
       id: 1,
       name: "CryptoAlice",
@@ -52,7 +58,7 @@ export default function Messages() {
       unread: 0,
       online: false,
     },
-  ]);
+  ] : []);
 
   const [messages] = useState([
     {
@@ -105,6 +111,13 @@ export default function Messages() {
 
   return (
     <div className="max-w-7xl mx-auto h-[calc(100vh-200px)]">
+      {!address && (
+        <WalletWarning 
+          title="Connect Your Wallet"
+          message="Please connect your wallet to access messaging features and chat with friends."
+        />
+      )}
+      
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 h-full flex">
         {/* Friends List */}
         <div className="w-80 border-r border-gray-200 dark:border-gray-700 flex flex-col">

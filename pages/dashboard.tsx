@@ -10,8 +10,13 @@ import {
   IoNotificationsOutline,
   IoAddOutline,
 } from "react-icons/io5";
+import { useUserChainInfo } from "@/modules/query";
+import { WalletWarning } from "@/modules/app/component/wallet-warning";
 
 export default function Dashboard() {
+  const { account } = useUserChainInfo();
+  const address = account?.address;
+  
   const [recentActivity] = useState([
     {
       id: 1,
@@ -48,10 +53,10 @@ export default function Dashboard() {
   ]);
 
   const [stats] = useState({
-    totalStaked: 1250,
-    totalEarned: 85,
-    friendsCount: 12,
-    messagesSent: 47,
+    totalStaked: address ? 1250 : 0,
+    totalEarned: address ? 85 : 0,
+    friendsCount: address ? 12 : 0,
+    messagesSent: address ? 47 : 0,
   });
 
   return (
@@ -65,6 +70,13 @@ export default function Dashboard() {
           Welcome back! Here's what's happening with your FriendFi account.
         </p>
       </div>
+
+      {!address && (
+        <WalletWarning 
+          title="Connect Your Wallet"
+          message="Please connect your wallet to view your dashboard information and access all features."
+        />
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

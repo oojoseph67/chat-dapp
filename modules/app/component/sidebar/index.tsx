@@ -11,6 +11,7 @@ import {
   IoStatsChartOutline,
   IoClose,
 } from "react-icons/io5";
+import { useUserChainInfo } from "@/modules/query";
 
 const navItems = [
   {
@@ -51,6 +52,9 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const { account } = useUserChainInfo();
+  const address = account?.address;
+
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -119,23 +123,25 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* User Profile Section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-gray-600 text-sm font-medium">U</span>
-            </div>
-            {!isCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  CryptoUser123
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  0x1234...5678
-                </p>
+        {address && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-gray-600 text-sm font-medium">U</span>
               </div>
-            )}
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    CryptoUser123
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {address}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

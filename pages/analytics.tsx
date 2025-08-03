@@ -1,89 +1,97 @@
 import { useState } from "react";
-import { 
-  IoStatsChartOutline, 
-  IoTrendingUpOutline, 
+import {
+  IoStatsChartOutline,
+  IoTrendingUpOutline,
   IoTrendingDownOutline,
   IoPeopleOutline,
   IoChatbubbleOutline,
   IoWalletOutline,
-  IoTimeOutline
+  IoTimeOutline,
 } from "react-icons/io5";
+import { useUserChainInfo } from "@/modules/query";
+import { WalletWarning } from "@/modules/app/component/wallet-warning";
 
 export default function Analytics() {
+  const { account } = useUserChainInfo();
+  const address = account?.address;
+
   const [timeRange, setTimeRange] = useState("7d");
 
   const stats = [
     {
       title: "Total Messages",
-      value: "1,247",
-      change: "+12.5%",
-      trend: "up",
+      value: address ? "1,247" : "0",
+      change: address ? "+12.5%" : "0%",
+      trend: address ? "up" : "down",
       icon: IoChatbubbleOutline,
-      color: "blue"
+      color: "blue",
     },
     {
       title: "Active Friends",
-      value: "89",
-      change: "+8.2%",
-      trend: "up",
+      value: address ? "89" : "0",
+      change: address ? "+8.2%" : "0%",
+      trend: address ? "up" : "down",
       icon: IoPeopleOutline,
-      color: "green"
+      color: "green",
     },
     {
       title: "Tokens Staked",
-      value: "2,450",
-      change: "+15.3%",
-      trend: "up",
+      value: address ? "2,450" : "0",
+      change: address ? "+15.3%" : "0%",
+      trend: address ? "up" : "down",
       icon: IoWalletOutline,
-      color: "purple"
+      color: "purple",
     },
     {
       title: "Engagement Rate",
-      value: "94.2%",
-      change: "-2.1%",
-      trend: "down",
+      value: address ? "94.2%" : "0%",
+      change: address ? "-2.1%" : "0%",
+      trend: address ? "down" : "down",
       icon: IoStatsChartOutline,
-      color: "orange"
-    }
+      color: "orange",
+    },
   ];
 
-  const recentActivity = [
+  const recentActivity = address ? [
     {
       id: 1,
       type: "message",
-      description: "Sent message to Alice Johnson",
+      description: "Sent message to CryptoAlice",
       time: "2 minutes ago",
-      value: "+1"
+      value: "+1",
     },
     {
       id: 2,
       type: "stake",
       description: "Staked 100 tokens",
       time: "1 hour ago",
-      value: "+100"
+      value: "+100",
     },
     {
       id: 3,
       type: "reward",
       description: "Earned reward from engagement",
       time: "3 hours ago",
-      value: "+5"
+      value: "+5",
     },
     {
       id: 4,
       type: "friend",
-      description: "Added Bob Smith as friend",
+      description: "Added DeFiBob as friend",
       time: "1 day ago",
-      value: "+1"
-    }
-  ];
+      value: "+1",
+    },
+  ] : [];
 
   const getColorClasses = (color: string) => {
     const colors = {
       blue: "bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400",
-      green: "bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400",
-      purple: "bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400",
-      orange: "bg-orange-100 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400"
+      green:
+        "bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400",
+      purple:
+        "bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400",
+      orange:
+        "bg-orange-100 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400",
     };
     return colors[color as keyof typeof colors] || colors.blue;
   };
@@ -99,6 +107,13 @@ export default function Analytics() {
           Track your engagement and platform performance.
         </p>
       </div>
+
+      {!address && (
+        <WalletWarning 
+          title="Connect Your Wallet"
+          message="Please connect your wallet to view your analytics and performance data."
+        />
+      )}
 
       {/* Time Range Selector */}
       <div className="mb-6">
@@ -127,12 +142,20 @@ export default function Analytics() {
             className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
           >
             <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 ${getColorClasses(stat.color)} rounded-xl flex items-center justify-center`}>
+              <div
+                className={`w-12 h-12 ${getColorClasses(
+                  stat.color
+                )} rounded-xl flex items-center justify-center`}
+              >
                 <stat.icon className="w-6 h-6" />
               </div>
-              <div className={`flex items-center space-x-1 text-sm ${
-                stat.trend === "up" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-              }`}>
+              <div
+                className={`flex items-center space-x-1 text-sm ${
+                  stat.trend === "up"
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-red-600 dark:text-red-400"
+                }`}
+              >
                 {stat.trend === "up" ? (
                   <IoTrendingUpOutline className="w-4 h-4" />
                 ) : (
@@ -141,7 +164,7 @@ export default function Analytics() {
                 <span>{stat.change}</span>
               </div>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 {stat.title}
@@ -207,13 +230,16 @@ export default function Analytics() {
             Top Friends by Engagement
           </h3>
           <div className="space-y-3">
-                         {[
-               { name: "CryptoAlice", messages: 47, avatar: "CA" },
-               { name: "DeFiBob", messages: 32, avatar: "DB" },
-               { name: "Web3Carol", messages: 28, avatar: "WC" },
-               { name: "NFTDavid", messages: 19, avatar: "ND" }
-             ].map((friend, index) => (
-              <div key={friend.name} className="flex items-center justify-between">
+            {(address ? [
+              { name: "CryptoAlice", messages: 47, avatar: "CA" },
+              { name: "DeFiBob", messages: 32, avatar: "DB" },
+              { name: "Web3Carol", messages: 28, avatar: "WC" },
+              { name: "NFTDavid", messages: 19, avatar: "ND" },
+            ] : []).map((friend, index) => (
+              <div
+                key={friend.name}
+                className="flex items-center justify-between"
+              >
                 <div className="flex items-center space-x-3">
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-6">
                     #{index + 1}
@@ -241,24 +267,40 @@ export default function Analytics() {
           </h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Total Staked</span>
-              <span className="text-sm font-medium text-gray-900 dark:text-white">2,450 tokens</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Total Staked
+              </span>
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {address ? "2,450 tokens" : "0 tokens"}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Total Earned</span>
-              <span className="text-sm font-medium text-green-600 dark:text-green-400">+85 tokens</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Total Earned
+              </span>
+              <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                {address ? "+85 tokens" : "0 tokens"}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">APY</span>
-              <span className="text-sm font-medium text-gray-900 dark:text-white">12.5%</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Staking Type
+              </span>
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {address ? "Flexible" : "N/A"}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Next Reward</span>
-              <span className="text-sm font-medium text-gray-900 dark:text-white">In 2 days</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Next Reward
+              </span>
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {address ? "In 2 days" : "N/A"}
+              </span>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

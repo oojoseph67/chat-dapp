@@ -23,6 +23,13 @@ import {
   getUserReceivedMessageAtIndex,
   getUserActivityByAddress,
   getUsernameByAddress,
+  getActiveUsers,
+  isActiveUser,
+  getActiveUsersCount,
+  getTotalMessages,
+  getStakedAmountByAddress,
+  getUserActivities,
+  getUserTips,
 } from "./chat-dapp-query.contract";
 
 // Contract state query hooks
@@ -291,4 +298,85 @@ export function useUsernameByAddress(address: string) {
     enabled: !!address,
     refetchInterval: 60000, // refetch every minute
   });
-} 
+}
+
+// New React Query hooks for the additional functions
+export function useActiveUsers() {
+  return useQuery({
+    queryKey: queryKeys.contract.activeUsers,
+    queryFn: async (): Promise<string[]> => {
+      return await getActiveUsers();
+    },
+    refetchInterval: 30000, // refetch every 30 seconds
+  });
+}
+
+export function useIsActiveUser(address: string) {
+  return useQuery({
+    queryKey: queryKeys.user.isActive(address),
+    queryFn: async (): Promise<boolean> => {
+      return await isActiveUser({ address });
+    },
+    enabled: !!address,
+    refetchInterval: 30000, // refetch every 30 seconds
+  });
+}
+
+export function useActiveUsersCount() {
+  return useQuery({
+    queryKey: queryKeys.contract.activeUsersCount,
+    queryFn: async (): Promise<number> => {
+      return await getActiveUsersCount();
+    },
+    refetchInterval: 30000, // refetch every 30 seconds
+  });
+}
+
+export function useTotalMessages() {
+  return useQuery({
+    queryKey: queryKeys.contract.totalMessages,
+    queryFn: async (): Promise<number> => {
+      return await getTotalMessages();
+    },
+    refetchInterval: 30000, // refetch every 30 seconds
+  });
+}
+
+export function useStakedAmountByAddress(address: string) {
+  return useQuery({
+    queryKey: queryKeys.user.stakedAmountByAddress(address),
+    queryFn: async (): Promise<number> => {
+      return await getStakedAmountByAddress({ address });
+    },
+    enabled: !!address,
+    refetchInterval: 30000, // refetch every 30 seconds
+  });
+}
+
+export function useUserActivities(address: string) {
+  return useQuery({
+    queryKey: queryKeys.user.activity(address),
+    queryFn: async (): Promise<{
+      messageCount: number;
+      tipSent: number;
+      tipReceived: number;
+      lastActive: number;
+      stakeAmount: number;
+    }> => {
+      return await getUserActivities({ address });
+    },
+    enabled: !!address,
+    refetchInterval: 30000, // refetch every 30 seconds
+  });
+}
+
+export function useUserTips(address: string) {
+  return useQuery({
+    queryKey: queryKeys.user.tips(address),
+    queryFn: async (): Promise<{ sent: number; received: number }> => {
+      return await getUserTips({ address });
+    },
+    enabled: !!address,
+    refetchInterval: 30000, // refetch every 30 seconds
+  });
+}
