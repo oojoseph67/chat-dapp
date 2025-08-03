@@ -18,6 +18,10 @@ contract Web3SocialChat {
     mapping(address => string) public usernames;
     mapping(address => bool) public hasUsername;
 
+    // Active users tracking
+    mapping(address => bool) public isActiveUser;
+    address[] public activeUsers;
+
     // Messaging system
     struct Message {
         address sender;
@@ -135,6 +139,16 @@ contract Web3SocialChat {
         userActivities[msg.sender].lastActive = block.timestamp;
         userActivities[receiver].lastActive = block.timestamp;
 
+        // Mark the users as active
+        if (!isActiveUser[msg.sender]) {
+            isActiveUser[msg.sender] = true;
+            activeUsers.push(msg.sender);
+        }
+        if (!isActiveUser[receiver]) {
+            isActiveUser[receiver] = true;
+            activeUsers.push(receiver);
+        }
+
         emit MessageSent(
             messageId,
             msg.sender,
@@ -174,6 +188,16 @@ contract Web3SocialChat {
         userActivities[receiver].lastActive = block.timestamp;
 
         payable(receiver).transfer(msg.value);
+
+        // Mark the users as active
+        if (!isActiveUser[msg.sender]) {
+            isActiveUser[msg.sender] = true;
+            activeUsers.push(msg.sender);
+        }
+        if (!isActiveUser[receiver]) {
+            isActiveUser[receiver] = true;
+            activeUsers.push(receiver);
+        }
 
         emit MessageSent(
             messageId,
@@ -253,8 +277,23 @@ contract Web3SocialChat {
 
     function getMessage(
         uint256 messageId
-    ) public view returns (Message memory) {
-        return messages[messageId];
+    )
+        public
+        view
+        returns (
+            Message memory,
+            string memory senderUsername,
+            string memory receiverUsername
+        )
+    {
+        Message memory msgDetail = messages[messageId];
+        string memory sender = hasUsername[msgDetail.sender]
+            ? usernames[msgDetail.sender]
+            : "No Username";
+        string memory receiver = hasUsername[msgDetail.receiver]
+            ? usernames[msgDetail.receiver]
+            : "No Username";
+        return (msgDetail, sender, receiver);
     }
 
     function getUserSentMessages(
@@ -267,6 +306,10 @@ contract Web3SocialChat {
         address user
     ) public view returns (uint256[] memory) {
         return userReceivedMessages[user];
+    }
+
+    function getActiveUsers() public view returns (address[] memory) {
+        return activeUsers;
     }
 
     function getUserUsername(address user) public view returns (string memory) {

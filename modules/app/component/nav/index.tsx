@@ -7,6 +7,7 @@ import { ConnectButton } from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
 import { useDisableScroll } from "../../hooks/useDisableScroll";
 import { chainInfo, client } from "@/utils/configs";
+import { Sidebar } from "../sidebar";
 
 const Nav_Links = [
   {
@@ -17,6 +18,7 @@ const Nav_Links = [
 
 export function Nav() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useDisableScroll(isMobileNavOpen);
@@ -34,41 +36,47 @@ export function Nav() {
   }, []);
 
   return (
-    <nav
-      className={cn(
-        "flex sticky top-0 inset-x-0 z-50 py-3 h-20 w-full md:px-14 px-4 gap-4 justify-between items-center font-inter",
-        isScrolled ? "bg-[#0F0F0F] border-b border-sec-bg" : "bg-transparent"
-      )}
-    >
-      <div className="lg:w-1/5 w-1/2 flex lg:items-center justify-end lg:gap-6 gap-2 ">
-        <ConnectButton
-          client={client}
-          chain={chainInfo}
-          wallets={[createWallet("io.metamask")]}
-          connectButton={{
-            label: "Connect Wallet",
-            className:
-              "!font-inter !rounded-xl lg:!w-36 !w-[75%] max-sm:!w-full !flex !items-center !justify-center hover:!bg-primary/65 hover:!text-foreground !duration-300 !ease-in-out !transition !bg-primary !text-muted-foreground !h-10",
-          }}
-        />
-      </div>
-      <div className="min-[1170px]:hidden flex items-center gap-8">
-        {isMobileNavOpen ? (
-          <IoClose
-            size={30}
-            onClick={() => setIsMobileNavOpen(false)}
-            className="text-muted-foreground"
-          />
-        ) : (
-          <IoIosMenu
-            size={30}
-            className="text-muted-foreground"
-            onClick={() => setIsMobileNavOpen(true)}
-          />
+    <>
+      <nav
+        className={cn(
+          "flex sticky top-0 inset-x-0 z-50 py-3 h-20 w-full md:px-14 px-4 gap-4 justify-between items-center font-inter",
+          isScrolled ? "bg-[#0F0F0F] border-b border-sec-bg" : "bg-transparent"
         )}
-      </div>
-      {isMobileNavOpen && <MobileNav />}
-    </nav>
+      >
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="lg:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            aria-label="Open sidebar"
+          >
+            <IoIosMenu size={24} className="text-gray-600 dark:text-gray-400" />
+          </button>
+          <Link href="/" className="hidden lg:flex items-center space-x-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">FF</span>
+            </div>
+            <span className="font-semibold text-lg text-gray-900 dark:text-white">
+              FriendFi
+            </span>
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <ConnectButton
+            client={client}
+            chain={chainInfo}
+            wallets={[createWallet("io.metamask")]}
+            connectButton={{
+              label: "Connect Wallet",
+              className:
+                "!font-inter !rounded-xl lg:!w-36 !w-[75%] max-sm:!w-full !flex !items-center !justify-center hover:!bg-primary/65 hover:!text-foreground !duration-300 !ease-in-out !transition !bg-primary !text-muted-foreground !h-10",
+            }}
+          />
+        </div>
+      </nav>
+
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+    </>
   );
 }
 
