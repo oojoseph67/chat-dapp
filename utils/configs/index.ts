@@ -60,11 +60,16 @@ export const chain1Mainnet = defineChain({
   },
 });
 
-export const chatSmartContractTestnet = "";
-export const chatSmartContractMainnet = "";
+export const chatContractTestnet = "0x9b158076bEe1aCDd073B6b130b9d344131236fcA";
+export const chatContractMainnet = "";
 
-export const chatSmartContract = IS_TESTNET
-  ? chatSmartContractTestnet
-  : chatSmartContractMainnet;
+export const usdtContractTestnet = "0xc89016a86ccEE9365e893f294f74E81a5A3AB559";
+export const usdtContractMainnet = "";
+
+export const usdtContract = "";
+
+export const chatContract = IS_TESTNET
+  ? chatContractTestnet
+  : chatContractMainnet;
 
 export const chainInfo = IS_TESTNET ? chain1Testnet : chain1Mainnet;

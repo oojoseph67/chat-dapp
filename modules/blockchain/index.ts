@@ -6,7 +6,7 @@ import {
   getContract as getContractThirdweb,
 } from "thirdweb";
 
-export const provider = new ethers.providers.JsonRpcProvider(chainInfo.rpc);
+export const provider = new ethers.JsonRpcProvider(chainInfo.rpc);
 
 export function getContractEthers({
   contractAddress,
@@ -21,28 +21,36 @@ export function getContractEthers({
 
 export function getContractCustom({
   contractAddress,
+  abi,
 }: {
   contractAddress: string;
+  abi?: any;
 }) {
-  const contract = getContractThirdweb({
+  if (abi) {
+    return getContractThirdweb({
+      client,
+      chain: chainInfo,
+      address: contractAddress,
+    });
+  }
+
+  return getContractThirdweb({
     client,
     chain: chainInfo,
-    address: contractAddress!,
+    address: contractAddress,
   });
-
-  return contract;
 }
 
 export function decimalOffChain(number: bigint | string | number) {
   if (!number) return;
-  const value = ethers.utils.formatEther(number);
+  const value = ethers.formatEther(number);
 
   return value;
 }
 
 export function decimalOnChain(number: bigint | string | number) {
   if (!number) return;
-  const value = ethers.utils.parseEther(number.toString());
+  const value = ethers.parseEther(number.toString());
 
   return value;
 }
