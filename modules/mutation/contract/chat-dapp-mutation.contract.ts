@@ -71,7 +71,7 @@ export function prepareSendMessageWithTip({
   return prepareContractCall({
     contract: chatContractInterface,
     method:
-      "function sendMessageWithTip(address receiver, string calldata ipfsHash, bool encrypted) payable",
+      "function sendMessageWithTip(address receiver,string calldata ipfsHash,bool encrypted)",
     params: [receiver, ipfsHash, encrypted],
     value,
   });
