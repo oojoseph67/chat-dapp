@@ -39,6 +39,26 @@ export function useUserNativeBalance() {
   return { balanceData, isBalanceLoading, isBalanceError };
 }
 
+export function useTokenBalance(contract: string) {
+  const {
+    data: balanceData,
+    isLoading: isBalanceLoading,
+    isError: isBalanceError,
+  } = useWalletBalance(
+    {
+      chain: chainInfo,
+      address: contract,
+      client,
+    },
+    {
+      enabled: !!contract,
+      refetchInterval: 5000,
+    }
+  );
+
+  return { balanceData, isBalanceLoading, isBalanceError };
+}
+
 export function useContractBalance() {
   const {
     data: balanceData,

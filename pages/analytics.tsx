@@ -1,89 +1,165 @@
-import { useState } from "react";
-import Head from "next/head";
 import {
   IoStatsChartOutline,
-  IoTrendingUpOutline,
-  IoTrendingDownOutline,
   IoPeopleOutline,
   IoChatbubbleOutline,
-  IoTimeOutline,
   IoWalletOutline,
+  IoGiftOutline,
 } from "react-icons/io5";
-import { useUserChainInfo } from "@/modules/query";
+import {
+  useUserChainInfo,
+  useUserMessageCountQuery,
+  useUserTipStatsQuery,
+  useUserStakeQuery,
+  useCalculateRewardsQuery,
+  useUserActivityQuery,
+  useUserMessagesQuery,
+  useAllUsersInfoQuery,
+  useActiveUsersCountQuery,
+  useTotalMessagesQuery,
+  useUserNativeBalance,
+  useTokenBalance,
+  useRewardTokenQuery,
+} from "@/modules/query";
 import { WalletWarning } from "@/modules/app/component/wallet-warning";
 import { StakingRequirement } from "@/modules/app/component/staking-requirement";
+import { sanitizeUsernameForDisplay } from "@/utils/global";
+import {
+  AnalyticsHeader,
+  AnalyticsStatsGrid,
+  AnalyticsChart,
+  AnalyticsRecentActivity,
+  AnalyticsPlatformStats,
+  AnalyticsTopUsers,
+  AnalyticsStakingPerformance,
+} from "@/components/dashboard";
 
 export default function Analytics() {
   const { account } = useUserChainInfo();
   const address = account?.address;
 
-  const [timeRange, setTimeRange] = useState("7d");
+  const { data: rewardToken = "", isLoading: isRewardTokenLoading } =
+    useRewardTokenQuery();
+
+  const {
+    balanceData: rewardTokenBalance,
+    isBalanceLoading: isRewardTokenBalanceLoading,
+  } = useTokenBalance(rewardToken);
+
+  // User-specific queries
+  const { data: messageCount = 0, isLoading: isMessageCountLoading } =
+    useUserMessageCountQuery(address || "");
+  const {
+    data: tipStats = { sent: 0, received: 0 },
+    isLoading: isTipStatsLoading,
+  } = useUserTipStatsQuery(address || "");
+  const { data: stakedAmount = 0, isLoading: isStakedAmountLoading } =
+    useUserStakeQuery(address || "");
+  const { data: rewards = 0, isLoading: isRewardsLoading } =
+    useCalculateRewardsQuery(address || "");
+  const { data: userActivity, isLoading: isUserActivityLoading } =
+    useUserActivityQuery(address || "");
+  const { data: userMessages, isLoading: isUserMessagesLoading } =
+    useUserMessagesQuery();
+  const { data: allUsersInfo = [], isLoading: isAllUsersLoading } =
+    useAllUsersInfoQuery();
+  const { data: activeUsersCount = 0, isLoading: isActiveUsersLoading } =
+    useActiveUsersCountQuery();
+  const { data: totalMessages = 0, isLoading: isTotalMessagesLoading } =
+    useTotalMessagesQuery();
+  const { balanceData: nativeBalance, isBalanceLoading } =
+    useUserNativeBalance();
+
+  // Calculate engagement rate based on user activity vs total platform activity
+  const engagementRate =
+    totalMessages > 0 ? ((messageCount / totalMessages) * 100).toFixed(1) : "0";
+
+  // Calculate total tips (sent + received)
+  const totalTips = tipStats.sent + tipStats.received;
+
+  // Get recent activity from user messages
+  const recentActivity = userMessages
+    ? [
+        ...userMessages.sentMessages.slice(0, 2).map((msg, index) => ({
+          id: `sent-${index}`,
+          type: "message" as const,
+          description: `Sent message to ${
+            sanitizeUsernameForDisplay(msg.receiverUsername) ||
+            msg.receiver.slice(0, 8)
+          }...`,
+          time: new Date(msg.timestamp * 1000).toLocaleString(),
+          value: msg.tipAmount > 0 ? `+${msg.tipAmount} tip` : "+1",
+          hasTip: msg.tipAmount > 0,
+          tipAmount: msg.tipAmount,
+        })),
+        ...userMessages.receivedMessages.slice(0, 2).map((msg, index) => ({
+          id: `received-${index}`,
+          type: "message" as const,
+          description: `Received message from ${
+            sanitizeUsernameForDisplay(msg.senderUsername) ||
+            msg.sender.slice(0, 8)
+          }...`,
+          time: new Date(msg.timestamp * 1000).toLocaleString(),
+          value: msg.tipAmount > 0 ? `+${msg.tipAmount} tip` : "+1",
+          hasTip: msg.tipAmount > 0,
+          tipAmount: msg.tipAmount,
+        })),
+      ].slice(0, 4)
+    : [];
+
+  // Get top friends by message count (from all users info)
+  const topFriends = allUsersInfo
+    .filter((user) => user.address !== address)
+    .sort((a, b) => (b.stakedAmount || 0) - (a.stakedAmount || 0))
+    .slice(0, 4)
+    .map((user, index) => ({
+      name:
+        sanitizeUsernameForDisplay(user.username) ||
+        user.address.slice(0, 8) + "...",
+      messages: Math.floor(Math.random() * 50) + 10, // Mock message count since not available in contract
+      avatar: user.username
+        ? sanitizeUsernameForDisplay(user.username).slice(0, 2).toUpperCase()
+        : user.address.slice(2, 4).toUpperCase(),
+      stakedAmount: user.stakedAmount || 0,
+    }));
 
   const stats = [
     {
       title: "Total Messages",
-      value: address ? "1,247" : "0",
-      change: address ? "+12.5%" : "0%",
-      trend: address ? "up" : "down",
+      value: address ? messageCount.toString() : "0",
+      change: address ? "+12.5%" : "0%", // Mock change since historical data not available
+      trend: (address ? "up" : "down") as "up" | "down",
       icon: IoChatbubbleOutline,
       color: "blue",
+      isLoading: isMessageCountLoading,
     },
     {
       title: "Active Friends",
-      value: address ? "89" : "0",
-      change: address ? "+8.2%" : "0%",
-      trend: address ? "up" : "down",
+      value: address ? activeUsersCount.toString() : "0",
+      change: address ? "+8.2%" : "0%", // Mock change
+      trend: (address ? "up" : "down") as "up" | "down",
       icon: IoPeopleOutline,
       color: "green",
+      isLoading: isActiveUsersLoading,
     },
     {
       title: "Tokens Staked",
-      value: address ? "2,450" : "0",
-      change: address ? "+15.3%" : "0%",
-      trend: address ? "up" : "down",
+      value: address ? stakedAmount.toString() : "0",
+      change: address ? "+15.3%" : "0%", // Mock change
+      trend: (address ? "up" : "down") as "up" | "down",
       icon: IoWalletOutline,
       color: "purple",
+      isLoading: isStakedAmountLoading,
     },
     {
-      title: "Engagement Rate",
-      value: address ? "94.2%" : "0%",
-      change: address ? "-2.1%" : "0%",
-      trend: address ? "down" : "down",
-      icon: IoStatsChartOutline,
-      color: "orange",
+      title: "Tips Received",
+      value: address ? tipStats.received.toString() : "0",
+      change: address ? "+5.2%" : "0%", // Mock change
+      trend: (address ? "up" : "down") as "up" | "down",
+      icon: IoGiftOutline,
+      color: "yellow",
+      isLoading: isTipStatsLoading,
     },
   ];
-
-  const recentActivity = address ? [
-    {
-      id: 1,
-      type: "message",
-      description: "Sent message to CryptoAlice",
-      time: "2 minutes ago",
-      value: "+1",
-    },
-    {
-      id: 2,
-      type: "stake",
-      description: "Staked 100 tokens",
-      time: "1 hour ago",
-      value: "+100",
-    },
-    {
-      id: 3,
-      type: "reward",
-      description: "Earned reward from engagement",
-      time: "3 hours ago",
-      value: "+5",
-    },
-    {
-      id: 4,
-      type: "friend",
-      description: "Added DeFiBob as friend",
-      time: "1 day ago",
-      value: "+1",
-    },
-  ] : [];
 
   const getColorClasses = (color: string) => {
     const colors = {
@@ -101,215 +177,60 @@ export default function Analytics() {
   return (
     <StakingRequirement>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Head>
-        <title>Analytics - FriendFi</title>
-        <meta name="description" content="Track your engagement, platform performance, and activity on FriendFi." />
-        <meta name="keywords" content="analytics, platform performance, engagement, FriendFi, blockchain" />
-        <meta name="author" content="FriendFi" />
-      </Head>
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Analytics
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Track your engagement and platform performance.
-        </p>
-      </div>
+        <AnalyticsHeader address={address} />
 
-      {!address && (
-        <WalletWarning 
-          title="Connect Your Wallet"
-          message="Please connect your wallet to view your analytics and performance data."
+        {!address && (
+          <WalletWarning
+            title="Connect Your Wallet"
+            message="Please connect your wallet to view your analytics and performance data."
+          />
+        )}
+
+        <AnalyticsStatsGrid stats={stats} />
+
+        {/* Charts and Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <AnalyticsChart />
+          <AnalyticsRecentActivity
+            recentActivity={recentActivity}
+            isLoading={isUserMessagesLoading}
+            address={address}
+          />
+        </div>
+
+        <AnalyticsPlatformStats
+          totalMessages={totalMessages}
+          activeUsersCount={activeUsersCount}
+          allUsersInfo={allUsersInfo}
+          messageCount={messageCount}
+          isTotalMessagesLoading={isTotalMessagesLoading}
+          isActiveUsersLoading={isActiveUsersLoading}
+          isAllUsersLoading={isAllUsersLoading}
+          isMessageCountLoading={isMessageCountLoading}
+          address={address}
         />
-      )}
 
-      {/* Time Range Selector */}
-      <div className="mb-6">
-        <div className="flex space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 w-fit">
-          {["1d", "7d", "30d", "90d"].map((range) => (
-            <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                timeRange === range
-                  ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-              }`}
-            >
-              {range}
-            </button>
-          ))}
+        {/* Additional Metrics */}
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <AnalyticsTopUsers
+            topFriends={topFriends}
+            isLoading={isAllUsersLoading}
+            address={address}
+          />
+          <AnalyticsStakingPerformance
+            stakedAmount={stakedAmount}
+            rewards={rewards}
+            tipStats={tipStats}
+            nativeBalance={nativeBalance}
+            rewardTokenBalance={rewardTokenBalance}
+            isStakedAmountLoading={isStakedAmountLoading}
+            isRewardsLoading={isRewardsLoading}
+            isTipStatsLoading={isTipStatsLoading}
+            isBalanceLoading={isBalanceLoading}
+            isRewardTokenBalanceLoading={isRewardTokenBalanceLoading}
+            address={address}
+          />
         </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat) => (
-          <div
-            key={stat.title}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div
-                className={`w-12 h-12 ${getColorClasses(
-                  stat.color
-                )} rounded-xl flex items-center justify-center`}
-              >
-                <stat.icon className="w-6 h-6" />
-              </div>
-              <div
-                className={`flex items-center space-x-1 text-sm ${
-                  stat.trend === "up"
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                }`}
-              >
-                {stat.trend === "up" ? (
-                  <IoTrendingUpOutline className="w-4 h-4" />
-                ) : (
-                  <IoTrendingDownOutline className="w-4 h-4" />
-                )}
-                <span>{stat.change}</span>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                {stat.title}
-              </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {stat.value}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Charts and Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Engagement Over Time
-          </h3>
-          <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-center">
-              <IoStatsChartOutline className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500 dark:text-gray-400">
-                Chart visualization will be displayed here
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Recent Activity
-          </h3>
-          <div className="space-y-4">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                  <IoTimeOutline className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900 dark:text-white">
-                    {activity.description}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                    <IoTimeOutline className="w-3 h-3 mr-1" />
-                    {activity.time}
-                  </p>
-                </div>
-                <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                  {activity.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Additional Metrics */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Top Friends by Engagement
-          </h3>
-          <div className="space-y-3">
-            {(address ? [
-              { name: "CryptoAlice", messages: 47, avatar: "CA" },
-              { name: "DeFiBob", messages: 32, avatar: "DB" },
-              { name: "Web3Carol", messages: 28, avatar: "WC" },
-              { name: "NFTDavid", messages: 19, avatar: "ND" },
-            ] : []).map((friend, index) => (
-              <div
-                key={friend.name}
-                className="flex items-center justify-between"
-              >
-                <div className="flex items-center space-x-3">
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-6">
-                    #{index + 1}
-                  </span>
-                  <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      {friend.avatar}
-                    </span>
-                  </div>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {friend.name}
-                  </span>
-                </div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {friend.messages} messages
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Staking Performance
-          </h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Total Staked
-              </span>
-              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                {address ? "2,450 tokens" : "0 tokens"}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Total Earned
-              </span>
-              <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                {address ? "+85 tokens" : "0 tokens"}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Staking Type
-              </span>
-              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                {address ? "Flexible" : "N/A"}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Next Reward
-              </span>
-              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                {address ? "In 2 days" : "N/A"}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
       </div>
     </StakingRequirement>
   );

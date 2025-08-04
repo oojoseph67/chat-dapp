@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { MessageContent } from "./MessageContent";
 import { useUserMessagesQuery } from "@/modules/query";
 import { useUserChainInfo } from "@/modules/query";
@@ -22,7 +22,7 @@ export function MessageList({ selectedFriend }: MessageListProps) {
   const { account } = useUserChainInfo();
   const address = account?.address;
   const { data: userMessages } = useUserMessagesQuery();
-  console.log({ userMessages });
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const messages = useMemo(() => {
     if (!selectedFriend || !userMessages) return [];
@@ -87,7 +87,11 @@ export function MessageList({ selectedFriend }: MessageListProps) {
     });
   }, [selectedFriend, userMessages, address]);
 
-  console.log({ messages });
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -109,6 +113,10 @@ export function MessageList({ selectedFriend }: MessageListProps) {
                 messageType: msg.messageType,
                 ipfsContent: msg.ipfsContent,
                 isEncrypted: msg.isEncrypted,
+                tipAmount: msg.tipAmount,
+                isOwn: msg.isOwn,
+                sender: msg.sender,
+                receiver: msg.receiver,
               }}
             />
             <p
@@ -121,6 +129,7 @@ export function MessageList({ selectedFriend }: MessageListProps) {
           </div>
         </div>
       ))}
+      <div ref={messagesEndRef} />
     </div>
   );
 }

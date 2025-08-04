@@ -1,7 +1,11 @@
 import { MessageMetadata } from "@/modules/mutation";
 import { client } from "@/utils/configs";
 import { useState, useEffect } from "react";
-import { IoDocumentOutline, IoImageOutline } from "react-icons/io5";
+import {
+  IoDocumentOutline,
+  IoImageOutline,
+  IoGiftOutline,
+} from "react-icons/io5";
 import { MediaRenderer } from "thirdweb/react";
 
 interface MessageContentProps {
@@ -10,11 +14,15 @@ interface MessageContentProps {
     messageType: string;
     ipfsContent?: MessageMetadata;
     isEncrypted: boolean;
+    tipAmount?: number;
+    isOwn?: boolean;
+    sender?: string;
+    receiver?: string;
   };
 }
 
 export function MessageContent({ message }: MessageContentProps) {
-  const { content, messageType, ipfsContent, isEncrypted } = message;
+  const { content, messageType, ipfsContent, isEncrypted, tipAmount, isOwn, sender, receiver } = message;
 
   if (messageType === "loading") {
     return (
@@ -42,5 +50,21 @@ export function MessageContent({ message }: MessageContentProps) {
     );
   }
 
-  return <div className="text-sm">{content}</div>;
+  return (
+    <div className="space-y-2">
+      <div className="text-sm">{content}</div>
+      {tipAmount && tipAmount > 0 && (
+        <div className={`flex items-center space-x-1 text-xs ${
+          isOwn 
+            ? "text-green-600 dark:text-green-400" 
+            : "text-yellow-600 dark:text-yellow-400"
+        }`}>
+          <IoGiftOutline className="w-3 h-3" />
+          <span>
+            {isOwn ? "Sent tip" : "Received tip"}: {tipAmount} XFI
+          </span>
+        </div>
+      )}
+    </div>
+  );
 }
