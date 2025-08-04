@@ -5,10 +5,6 @@ import {
   IoPeopleOutline,
   IoSearchOutline,
   IoAddOutline,
-  IoRemoveOutline,
-  IoCheckmarkOutline,
-  IoCloseOutline,
-  IoWalletOutline,
   IoChatbubbleOutline,
   IoChevronBackOutline,
   IoChevronForwardOutline,
@@ -18,13 +14,10 @@ import { WalletWarning } from "@/modules/app/component/wallet-warning";
 import { StakingRequirement } from "@/modules/app/component/staking-requirement";
 import {
   useUserChainInfo,
-  useActiveUsersQuery,
-  useUserSentMessagesQuery,
-  useUserReceivedMessagesQuery,
-  useUsernameByAddressQuery,
-  useStakedAmountByAddressQuery,
   useAllUsersInfoQuery,
+  useUserMessagesQuery,
 } from "@/modules/query";
+import { sanitizeUsernameForDisplay } from "@/utils/global";
 
 export default function Friends() {
   const { account } = useUserChainInfo();
@@ -43,30 +36,33 @@ export default function Friends() {
   console.log({ allUsersInfo });
 
   // Get current user's message data
-  const { data: userSentMessages = [] } = useUserSentMessagesQuery(
-    address || ""
-  );
-  const { data: userReceivedMessages = [] } = useUserReceivedMessagesQuery(
-    address || ""
-  );
+  const { data: userMessages } = useUserMessagesQuery();
 
   // Determine actual friends based on message history
   const actualFriends = useMemo(() => {
-    if (!address) return [];
+    if (!address || !userMessages) return [];
 
+    const receivedMessages = userMessages.receivedMessages;
+    const sentMessages = userMessages.sentMessages;
+
+    // Get all unique addresses that the current user has messaged with
     const friendAddresses = new Set<string>();
-    const hasMessageHistory =
-      userSentMessages.length > 0 || userReceivedMessages.length > 0;
 
-    if (hasMessageHistory) {
-      return allUsersInfo
-        .filter((user) => user.address !== address)
-        .filter((user) => user.stakedAmount > 0)
-        .slice(0, 5);
-    }
+    // Add addresses from received messages
+    receivedMessages.forEach((msg) => {
+      friendAddresses.add(msg.sender);
+    });
 
-    return [];
-  }, [allUsersInfo, address, userSentMessages, userReceivedMessages]);
+    // Add addresses from sent messages
+    sentMessages.forEach((msg) => {
+      friendAddresses.add(msg.receiver);
+    });
+
+    return allUsersInfo
+      .filter((user) => user.address !== address)
+      .filter((user) => friendAddresses.has(user.address))
+      .sort((a, b) => b.stakedAmount - a.stakedAmount);
+  }, [allUsersInfo, address, userMessages]);
 
   // Filter out current user and sort by staked amount
   const sortedUsers = useMemo(() => {
@@ -78,18 +74,26 @@ export default function Friends() {
   // Filter users based on search query
   const filteredUsers = useMemo(() => {
     return sortedUsers.filter(
-      (user) =>
-        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.address.toLowerCase().includes(searchQuery.toLowerCase())
+      (user) => {
+        const sanitizedUsername = sanitizeUsernameForDisplay(user.username);
+        return (
+          sanitizedUsername.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user.address.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
     );
   }, [sortedUsers, searchQuery]);
 
   // Separate friends and suggestions
   const friends = useMemo(() => {
     return actualFriends.filter(
-      (user) =>
-        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.address.toLowerCase().includes(searchQuery.toLowerCase())
+      (user) => {
+        const sanitizedUsername = sanitizeUsernameForDisplay(user.username);
+        return (
+          sanitizedUsername.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user.address.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
     );
   }, [actualFriends, searchQuery]);
 
@@ -196,12 +200,12 @@ export default function Friends() {
                       <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
                           <span className="text-sm font-medium text-white">
-                            {friend.username.slice(0, 2).toUpperCase()}
+                            {sanitizeUsernameForDisplay(friend.username).slice(0, 2).toUpperCase()}
                           </span>
                         </div>
                         <div>
                           <h3 className="font-semibold text-white">
-                            {friend.username}
+                            {sanitizeUsernameForDisplay(friend.username)}
                           </h3>
                           <p className="text-sm text-gray-300">
                             {friend.address.slice(0, 6)}...
@@ -252,12 +256,12 @@ export default function Friends() {
                       <div className="flex items-center space-x-3 mb-3">
                         <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
                           <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                            {user.username.slice(0, 2).toUpperCase()}
+                            {sanitizeUsernameForDisplay(user.username).slice(0, 2).toUpperCase()}
                           </span>
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900 dark:text-white">
-                            {user.username}
+                            {sanitizeUsernameForDisplay(user.username)}
                           </h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
                             {user.address.slice(0, 6)}...

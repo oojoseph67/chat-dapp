@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useAllUsersInfoQuery } from "@/modules/query";
 import { useUserChainInfo } from "@/modules/query";
+import { sanitizeUsernameForDisplay } from "@/utils/global";
 
 interface Friend {
   address: string;
@@ -27,10 +28,12 @@ export function ChatHeader({ selectedFriend }: ChatHeaderProps) {
     const user = allUsersInfo.find((user) => user.address === selectedFriend);
     if (!user) return undefined;
 
+    const sanitizedUsername = sanitizeUsernameForDisplay(user.username);
+    
     return {
       address: user.address,
-      name: user.username,
-      avatar: user.username.slice(0, 2).toUpperCase(),
+      name: sanitizedUsername,
+      avatar: sanitizedUsername.slice(0, 2).toUpperCase(),
       lastMessage: "Start a conversation",
       time: "Just now",
       unread: 0,

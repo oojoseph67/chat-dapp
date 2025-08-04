@@ -96,88 +96,99 @@ export const formatDate = (timestamp: number) => {
 export const formatTime = (timestamp: number) => {
   return new Date(timestamp * 1000).toLocaleTimeString();
 };
+// Foul word filter utility
+const FOUL_WORDS = [
+  // Common profanity and offensive terms
+  "fuck",
+  "shit",
+  "bitch",
+  "ass",
+  "damn",
+  "hell",
+  "piss",
+  "cock",
+  "dick",
+  "pussy",
+  "cunt",
+  "whore",
+  "slut",
+  "bastard",
+  "motherfucker",
+  "fucker",
+  "fucking",
+  "shitty",
+  "asshole",
+  "dumbass",
+  "jackass",
+  "dickhead",
+  "prick",
+  "twat",
+  "wanker",
+  "cocksucker",
+  "faggot",
+  "nigger",
+  "nigga",
+  "fag",
+  "dyke",
+  "kike",
+  "spic",
+  "chink",
+  "gook",
+  "wetback",
+  "towelhead",
+  "sandnigger",
+  // Add more as needed
+];
 
-// IPFS utility functions
-// export async function fetchIPFSContent(ipfsHash: string) {
-//   try {
-//     // Remove ipfs:// prefix if present
-//     const hash = ipfsHash.replace('ipfs://', '');
+export function containsFoulWords(text: string): boolean {
+  const normalizedText = text.toLowerCase().replace(/[^a-zA-Z\s]/g, " ");
+  const words = normalizedText.split(/\s+/);
 
-//     // Use a public IPFS gateway
-//     const response = await fetch(`https://ipfs.io/ipfs/${hash}`);
+  return words.some((word) => FOUL_WORDS.includes(word));
+}
 
-//     if (!response.ok) {
-//       throw new Error(`Failed to fetch IPFS content: ${response.statusText}`);
-//     }
+export function filterFoulWords(text: string): string {
+  const normalizedText = text.toLowerCase().replace(/[^a-zA-Z\s]/g, " ");
+  const words = normalizedText.split(/\s+/);
 
-//     const contentType = response.headers.get('content-type');
+  const filteredWords = words.map((word) => {
+    if (FOUL_WORDS.includes(word)) {
+      return "*".repeat(word.length);
+    }
+    return word;
+  });
 
-//     if (contentType?.includes('application/json')) {
-//       return await response.json();
-//     } else if (contentType?.includes('text/')) {
-//       return await response.text();
-//     } else {
-//       // For binary files, return the blob
-//       return await response.blob();
-//     }
-//   } catch (error) {
-//     console.error('Error fetching IPFS content:', error);
-//     return null;
-//   }
-// }
+  return filteredWords.join(" ");
+}
 
-// export interface MessageMetadata {
-//   type: 'text' | 'file';
-//   content?: string;
-//   fileName?: string;
-//   fileSize?: number;
-//   mimeType?: string;
-//   encrypted?: boolean;
-// }
+export function sanitizeMessage(text: string): {
+  isClean: boolean;
+  sanitizedText: string;
+  originalText: string;
+} {
+  const hasFoulWords = containsFoulWords(text);
 
-// export async function parseMessageContent(ipfsHash: string): Promise<MessageMetadata | null> {
-//   try {
-//     const content = await fetchIPFSContent(ipfsHash);
+  if (hasFoulWords) {
+    return {
+      isClean: false,
+      sanitizedText: filterFoulWords(text),
+      originalText: text,
+    };
+  }
 
-//     if (!content) {
-//       return null;
-//     }
+  return {
+    isClean: true,
+    sanitizedText: text,
+    originalText: text,
+  };
+}
 
-//     // If it's a JSON object, it might contain metadata
-//     if (typeof content === 'object' && content !== null && !(content instanceof Blob)) {
-//       return {
-//         type: content.type || 'text',
-//         content: content.content || content.text,
-//         fileName: content.fileName || content.name,
-//         fileSize: content.fileSize || content.size,
-//         mimeType: content.mimeType || content.type,
-//         encrypted: content.encrypted || false,
-//       };
-//     }
-
-//     // If it's a string, treat as text
-//     if (typeof content === 'string') {
-//       return {
-//         type: 'text',
-//         content,
-//         encrypted: false,
-//       };
-//     }
-
-//     // If it's a blob, treat as file
-//     if (content instanceof Blob) {
-//       return {
-//         type: 'file',
-//         fileName: 'Unknown file',
-//         fileSize: content.size,
-//         mimeType: content.type,
-//         encrypted: false,
-//       };
-//     }
-
-//     return null;
-//   } catch (error) {
-//     console.error('Error parsing message content:', error);
-//     return null;
-//   }
-// }
+export function sanitizeUsernameForDisplay(username: string): string {
+  const sanitized = sanitizeMessage(username);
+  
+  if (!sanitized.isClean) {
+    return "User";
+  }
+  
+  return username;
+}

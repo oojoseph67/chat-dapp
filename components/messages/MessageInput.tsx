@@ -3,6 +3,7 @@ import {
   IoSendOutline,
   IoAttachOutline,
   IoCloseOutline,
+  IoWarningOutline,
 } from "react-icons/io5";
 import {
   useSendMessageMutation,
@@ -10,6 +11,7 @@ import {
 } from "@/modules/mutation";
 import { download } from "thirdweb/storage";
 import { client } from "@/utils/configs";
+import { sanitizeMessage } from "@/utils/global";
 
 interface MessageInputProps {
   selectedFriend: string | null;
@@ -21,6 +23,8 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
   const [isTipMode, setIsTipMode] = useState<boolean>(false);
   const [tipAmount, setTipAmount] = useState<number>(0);
   const [isEncrypted, setIsEncrypted] = useState<boolean>(false);
+  const [showFoulWordWarning, setShowFoulWordWarning] =
+    useState<boolean>(false);
 
   // Message mutations
   const { mutate: sendMessage, isPending: isSendingMessage } =
@@ -29,13 +33,23 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
     useSendMessageWithTipMutation();
 
   const handleSendMessage = () => {
-    if (!selectedFriend || (!message.trim() && !selectedFile)) return;
+    if (!selectedFriend || !message.trim()) return;
+
+    // Check for foul words
+    const sanitized = sanitizeMessage(message.trim());
+
+    if (!sanitized.isClean) {
+      setShowFoulWordWarning(true);
+      // Auto-hide warning after 5 seconds
+      setTimeout(() => setShowFoulWordWarning(false), 5000);
+      return;
+    }
 
     const messageData = {
       receiver: selectedFriend,
-      content: message.trim() || undefined,
+      content: sanitized.sanitizedText,
       isEncrypted,
-      file: selectedFile || undefined,
+      file: undefined,
     };
 
     if (isTipMode && tipAmount > 0) {
@@ -46,12 +60,94 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
         },
         {
           onSuccess() {
+            // Reset form for text messages
+            setMessage("");
+            setTipAmount(0);
+            setIsTipMode(false);
+            setIsEncrypted(false);
+            setShowFoulWordWarning(false);
+          },
+          onError() {
+            // Reset form for text messages
+            setMessage("");
+            setTipAmount(0);
+            setIsTipMode(false);
+            setIsEncrypted(false);
+            setShowFoulWordWarning(false);
+          },
+        }
+      );
+    } else {
+      sendMessage(messageData, {
+        onSuccess() {
+          // Reset form for text messages
+          setMessage("");
+          setTipAmount(0);
+          setIsTipMode(false);
+          setIsEncrypted(false);
+          setShowFoulWordWarning(false);
+        },
+        onError() {
+          // Reset form for text messages
+          setMessage("");
+          setTipAmount(0);
+          setIsTipMode(false);
+          setIsEncrypted(false);
+          setShowFoulWordWarning(false);
+        },
+      });
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      // Automatically send file message
+      const messageData = {
+        receiver: selectedFriend!,
+        content: undefined,
+        isEncrypted,
+        file: file,
+      };
+
+      if (isTipMode && tipAmount > 0) {
+        sendMessageWithTip(
+          {
+            ...messageData,
+            tipAmount,
+          },
+          {
+            onSuccess() {
+              // Reset form
+              setMessage("");
+              setTipAmount(0);
+              setSelectedFile(null);
+              setIsTipMode(false);
+              setIsEncrypted(false);
+              setShowFoulWordWarning(false);
+            },
+            onError() {
+              // Reset form
+              setMessage("");
+              setTipAmount(0);
+              setSelectedFile(null);
+              setIsTipMode(false);
+              setIsEncrypted(false);
+              setShowFoulWordWarning(false);
+            },
+          }
+        );
+      } else {
+        sendMessage(messageData, {
+          onSuccess() {
             // Reset form
             setMessage("");
             setTipAmount(0);
             setSelectedFile(null);
             setIsTipMode(false);
             setIsEncrypted(false);
+            setShowFoulWordWarning(false);
           },
           onError() {
             // Reset form
@@ -60,18 +156,10 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
             setSelectedFile(null);
             setIsTipMode(false);
             setIsEncrypted(false);
+            setShowFoulWordWarning(false);
           },
-        }
-      );
-    } else {
-      sendMessage(messageData);
-    }
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
+        });
+      }
     }
   };
 
@@ -79,19 +167,32 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
     setSelectedFile(null);
   };
 
-  const handleDownloadFile = async () => {
-    const file = await download({
-      client,
-      uri: "ipfs://QmZFB4EbrfMA7QugWwFbezpux1Vs66zfnq1qQ4t6tTxTFw",
-    });
+//   const handleDownloadFile = async () => {
+//     const file = await download({
+//       client,
+//       uri: "ipfs://QmZFB4EbrfMA7QugWwFbezpux1Vs66zfnq1qQ4t6tTxTFw",
+//     });
 
-    console.log({ file });
-  };
+//     console.log({ file });
+//   };
 
-  console.log({ message });
+//   console.log({ message });
 
   return (
     <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+      {/* Foul Word Warning */}
+      {showFoulWordWarning && (
+        <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+          <div className="flex items-center space-x-2">
+            <IoWarningOutline className="w-4 h-4 text-red-600" />
+            <span className="text-sm text-red-700 dark:text-red-300">
+              Please keep your messages respectful. Inappropriate language is
+              not allowed.
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* File Upload Preview */}
       {selectedFile && (
         <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -174,9 +275,7 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
         <div className="flex-1 relative">
           <input
             type="text"
-            placeholder={
-              selectedFile ? "Add a message (optional)..." : "Type a message..."
-            }
+            placeholder="Type a message..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
@@ -185,12 +284,12 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
         </div>
 
         <button
-          onClick={handleDownloadFile}
-          //   disabled={
-          //     (!message.trim() && !selectedFile) ||
-          //     isSendingMessage ||
-          //     isSendingWithTip
-          //   }
+          onClick={handleSendMessage}
+          disabled={
+            !message.trim() ||
+            isSendingMessage ||
+            isSendingWithTip
+          }
           className="p-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           aria-label="Send message"
         >

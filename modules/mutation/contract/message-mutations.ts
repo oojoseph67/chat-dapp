@@ -44,13 +44,6 @@ export function useSendMessageMutation() {
         throw new Error("No active account found");
       }
 
-      const chatContractInterface = getContractCustom({
-        contractAddress: chatContract,
-        abi: ChatContractABI,
-      });
-
-      console.log({ chatContractInterface });
-
       // let contentIPFSHash =
       //   "ipfs://QmRiHZzXW2CezXdXLqy2U5j3uvwQ8qV6XGtuRtHtnjNByQ";
       let contentIPFSHash = "";
@@ -97,10 +90,6 @@ export function useSendMessageMutation() {
           isEncrypted,
         };
 
-        console.log({ content });
-        console.log({ receiver });
-        console.log({ metadata });
-
         const metadataURI = await upload({
           client: client,
           files: [
@@ -112,25 +101,17 @@ export function useSendMessageMutation() {
           uploadWithoutDirectory: true,
         });
 
-        console.log({ metadataURI });
-
         if (!metadataURI) throw new Error("Failed to upload content to IPFS");
         contentIPFSHash = metadataURI;
       } else {
         throw new Error("Either content or file must be provided");
       }
 
-      // console.log({ contentIPFSHash });
-      // contentIPFSHash = contentIPFSHash.replace("ipfs://", "");
-      // console.log({ contentIPFSHash });
-
       const transaction = prepareSendMessage({
         receiver,
         ipfsHash: contentIPFSHash,
         encrypted: isEncrypted,
       });
-
-      console.log({ transaction });
 
       const transactionReceipt = await sendAndConfirmTransaction({
         account,
