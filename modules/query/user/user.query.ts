@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { chainInfo, client } from "@/utils/configs";
+import { chainInfo, chatContract, client } from "@/utils/configs";
 import {
   useActiveAccount,
   useActiveWallet,
@@ -32,6 +32,26 @@ export function useUserNativeBalance() {
     },
     {
       enabled: !!userAddress,
+      refetchInterval: 5000,
+    }
+  );
+
+  return { balanceData, isBalanceLoading, isBalanceError };
+}
+
+export function useContractBalance() {
+  const {
+    data: balanceData,
+    isLoading: isBalanceLoading,
+    isError: isBalanceError,
+  } = useWalletBalance(
+    {
+      chain: chainInfo,
+      address: chatContract,
+      client,
+    },
+    {
+      enabled: !!chatContract,
       refetchInterval: 5000,
     }
   );
