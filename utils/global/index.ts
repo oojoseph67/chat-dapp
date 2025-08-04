@@ -96,3 +96,88 @@ export const formatDate = (timestamp: number) => {
 export const formatTime = (timestamp: number) => {
   return new Date(timestamp * 1000).toLocaleTimeString();
 };
+
+// IPFS utility functions
+export async function fetchIPFSContent(ipfsHash: string) {
+  try {
+    // Remove ipfs:// prefix if present
+    const hash = ipfsHash.replace('ipfs://', '');
+    
+    // Use a public IPFS gateway
+    const response = await fetch(`https://ipfs.io/ipfs/${hash}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch IPFS content: ${response.statusText}`);
+    }
+    
+    const contentType = response.headers.get('content-type');
+    
+    if (contentType?.includes('application/json')) {
+      return await response.json();
+    } else if (contentType?.includes('text/')) {
+      return await response.text();
+    } else {
+      // For binary files, return the blob
+      return await response.blob();
+    }
+  } catch (error) {
+    console.error('Error fetching IPFS content:', error);
+    return null;
+  }
+}
+
+export interface MessageMetadata {
+  type: 'text' | 'file';
+  content?: string;
+  fileName?: string;
+  fileSize?: number;
+  mimeType?: string;
+  encrypted?: boolean;
+}
+
+export async function parseMessageContent(ipfsHash: string): Promise<MessageMetadata | null> {
+  try {
+    const content = await fetchIPFSContent(ipfsHash);
+    
+    if (!content) {
+      return null;
+    }
+    
+    // If it's a JSON object, it might contain metadata
+    if (typeof content === 'object' && content !== null && !(content instanceof Blob)) {
+      return {
+        type: content.type || 'text',
+        content: content.content || content.text,
+        fileName: content.fileName || content.name,
+        fileSize: content.fileSize || content.size,
+        mimeType: content.mimeType || content.type,
+        encrypted: content.encrypted || false,
+      };
+    }
+    
+    // If it's a string, treat as text
+    if (typeof content === 'string') {
+      return {
+        type: 'text',
+        content,
+        encrypted: false,
+      };
+    }
+    
+    // If it's a blob, treat as file
+    if (content instanceof Blob) {
+      return {
+        type: 'file',
+        fileName: 'Unknown file',
+        fileSize: content.size,
+        mimeType: content.type,
+        encrypted: false,
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error parsing message content:', error);
+    return null;
+  }
+}

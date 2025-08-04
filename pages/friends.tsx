@@ -42,6 +42,32 @@ export default function Friends() {
   const { data: allUsersInfo = [] } = useAllUsersInfoQuery();
   console.log({ allUsersInfo });
 
+  // Get current user's message data
+  const { data: userSentMessages = [] } = useUserSentMessagesQuery(
+    address || ""
+  );
+  const { data: userReceivedMessages = [] } = useUserReceivedMessagesQuery(
+    address || ""
+  );
+
+  // Determine actual friends based on message history
+  const actualFriends = useMemo(() => {
+    if (!address) return [];
+
+    const friendAddresses = new Set<string>();
+    const hasMessageHistory =
+      userSentMessages.length > 0 || userReceivedMessages.length > 0;
+
+    if (hasMessageHistory) {
+      return allUsersInfo
+        .filter((user) => user.address !== address)
+        .filter((user) => user.stakedAmount > 0)
+        .slice(0, 5);
+    }
+
+    return [];
+  }, [allUsersInfo, address, userSentMessages, userReceivedMessages]);
+
   // Filter out current user and sort by staked amount
   const sortedUsers = useMemo(() => {
     return allUsersInfo
@@ -58,29 +84,28 @@ export default function Friends() {
     );
   }, [sortedUsers, searchQuery]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  // Separate friends and suggestions
+  const friends = useMemo(() => {
+    return actualFriends.filter(
+      (user) =>
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.address.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [actualFriends, searchQuery]);
+
+  const suggestions = useMemo(() => {
+    // Filter out users who are already friends
+    const friendAddresses = new Set(
+      actualFriends.map((friend) => friend.address)
+    );
+    return filteredUsers.filter((user) => !friendAddresses.has(user.address));
+  }, [filteredUsers, actualFriends]);
+
+  // Pagination for suggestions
+  const totalPages = Math.ceil(suggestions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
-
-  // Get current user's message data
-  const { data: userSentMessages = [] } = useUserSentMessagesQuery(
-    address || ""
-  );
-  const { data: userReceivedMessages = [] } = useUserReceivedMessagesQuery(
-    address || ""
-  );
-
-  // Check which users the current user has chatted with
-  const friends = useMemo(() => {
-    return paginatedUsers.filter((user) => {
-      // Check if there are any messages between the current user and this user
-      const hasInteracted =
-        userSentMessages.length > 0 || userReceivedMessages.length > 0;
-      return hasInteracted;
-    });
-  }, [paginatedUsers, userSentMessages, userReceivedMessages]);
+  const paginatedSuggestions = suggestions.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -96,21 +121,19 @@ export default function Friends() {
 
   return (
     <StakingRequirement>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Head>
-          <title>Friends - FriendFi</title>
-          <meta
-            name="description"
-            content="Manage your friends and discover new people on FriendFi."
-          />
-          <meta name="keywords" content="friends, social, blockchain, web3" />
-          <meta name="author" content="FriendFi" />
-        </Head>
+      <Head>
+        <title>Friends - FriendFi</title>
+        <meta
+          name="description"
+          content="Manage your friends and discover new people on FriendFi."
+        />
+        <meta name="keywords" content="friends, social, blockchain, web3" />
+        <meta name="author" content="FriendFi" />
+      </Head>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Friends
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <h1 className="text-3xl font-bold text-white mb-2">Friends</h1>
+          <p className="text-gray-300">
             Connect with friends and discover new people on FriendFi.
           </p>
         </div>
@@ -122,8 +145,8 @@ export default function Friends() {
           />
         )}
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800">
+          <div className="p-6 border-b border-gray-800">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="relative flex-1 max-w-md">
                 <input
@@ -131,18 +154,18 @@ export default function Friends() {
                   placeholder="Search users..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-800 text-white placeholder-gray-400"
                 />
                 <IoSearchOutline className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
 
-              <div className="flex space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+              <div className="flex space-x-1 bg-gray-800 rounded-lg p-1">
                 <button
                   onClick={() => setActiveTab("friends")}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                     activeTab === "friends"
-                      ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                      ? "bg-gray-700 text-white shadow-sm"
+                      : "text-gray-400 hover:text-white"
                   }`}
                 >
                   Friends ({friends.length})
@@ -151,42 +174,42 @@ export default function Friends() {
                   onClick={() => setActiveTab("suggestions")}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                     activeTab === "suggestions"
-                      ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                      ? "bg-gray-700 text-white shadow-sm"
+                      : "text-gray-400 hover:text-white"
                   }`}
                 >
-                  Suggestions ({paginatedUsers.length})
+                  Suggestions ({suggestions.length})
                 </button>
               </div>
             </div>
           </div>
 
-          <div className="p-4">
+          <div className="p-6">
             {activeTab === "friends" && (
               <div className="space-y-4">
                 {friends.length > 0 ? (
                   friends.map((friend) => (
                     <div
                       key={friend.address}
-                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
+                      className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-lg border border-purple-500/30"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-medium text-white">
                             {friend.username.slice(0, 2).toUpperCase()}
                           </span>
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                          <h3 className="font-semibold text-white">
                             {friend.username}
                           </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <p className="text-sm text-gray-300">
                             {friend.address.slice(0, 6)}...
                             {friend.address.slice(-4)}
                           </p>
                           <div className="flex items-center space-x-1 mt-1">
-                            <IoInformationCircleOutline className="w-3 h-3 text-blue-500" />
-                            <span className="text-xs text-blue-600 dark:text-blue-400">
+                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            <span className="text-xs text-blue-400">
                               {friend.stakedAmount > 0
                                 ? `${friend.stakedAmount} tokens staked`
                                 : "No stake"}
@@ -199,7 +222,7 @@ export default function Friends() {
                         onClick={() =>
                           handleStartMessage(friend.address, friend.username)
                         }
-                        className="w-full flex items-center justify-center space-x-1 px-3 py-2 bg-primary text-white text-sm rounded-md hover:bg-primary/90 transition-colors duration-200"
+                        className="flex items-center justify-center space-x-2 px-6 py-3 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors duration-200 font-medium"
                       >
                         <IoChatbubbleOutline className="w-4 h-4" />
                         <span>Message</span>
@@ -218,19 +241,10 @@ export default function Friends() {
               </div>
             )}
 
-            {/* {activeTab === "requests" && (
-              <div className="text-center py-8">
-                <IoPeopleOutline className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">
-                  Friend requests feature coming soon.
-                </p>
-              </div>
-            )} */}
-
             {activeTab === "suggestions" && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {paginatedUsers.map((user) => (
+                  {paginatedSuggestions.map((user) => (
                     <div
                       key={user.address}
                       className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600"
@@ -314,7 +328,7 @@ export default function Friends() {
                   </div>
                 )}
 
-                {paginatedUsers.length === 0 && (
+                {paginatedSuggestions.length === 0 && (
                   <div className="text-center py-8">
                     <IoPeopleOutline className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">

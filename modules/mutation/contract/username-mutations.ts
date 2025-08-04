@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { sendAndConfirmTransaction } from "thirdweb";
 import { queryKeys } from "@/modules/query/query-keys";
-import { prepareSetUsername } from "./chat-dapp-mutation.contract";
+import { prepareRegisterUser, prepareUpdateUsername } from "./chat-dapp-mutation.contract";
 import { useUserChainInfo } from "@/modules/query";
 
-// Username mutations
-export function useSetUsernameMutation() {
+// Register user mutation
+export function useRegisterUserMutation() {
   const { account } = useUserChainInfo();
   const address = account?.address;
   const queryClient = useQueryClient();
@@ -18,7 +18,7 @@ export function useSetUsernameMutation() {
 
       console.log({ username });
 
-      const transaction = prepareSetUsername({ username });
+      const transaction = prepareRegisterUser({ username });
       console.log({ transaction });
 
       const transactionReceipt = await sendAndConfirmTransaction({
@@ -27,7 +27,7 @@ export function useSetUsernameMutation() {
       });
 
       if (transactionReceipt.status === "reverted") {
-        throw new Error("Failed to set username");
+        throw new Error("Failed to register user");
       }
 
       return {
@@ -48,16 +48,16 @@ export function useSetUsernameMutation() {
     },
     meta: {
       loadingMessage: {
-        title: "Setting Username",
-        description: "Setting your username...",
+        title: "Registering User",
+        description: "Registering your account...",
       },
       successMessage: {
-        title: "Username Set",
-        description: "Your username has been set successfully!",
+        title: "User Registered",
+        description: "Your account has been registered successfully!",
       },
       errorMessage: {
-        title: "Username Set Failed",
-        description: "Failed to set username. Please try again.",
+        title: "Registration Failed",
+        description: "Failed to register user. Please try again.",
       },
     },
   });

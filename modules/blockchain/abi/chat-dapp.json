@@ -10,12 +10,38 @@
         "inputs": [
             {
                 "internalType": "address",
+                "name": "token",
+                "type": "address"
+            }
+        ],
+        "name": "emergencyWithdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "username",
+                "type": "string"
+            }
+        ],
+        "name": "registerUser",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
                 "name": "_rewardToken",
                 "type": "address"
             },
             {
                 "internalType": "uint256",
-                "name": "_minStakeAmount",
+                "name": "_minStake",
                 "type": "uint256"
             }
         ],
@@ -28,17 +54,17 @@
             {
                 "indexed": true,
                 "internalType": "uint256",
-                "name": "messageId",
+                "name": "id",
                 "type": "uint256"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "address",
                 "name": "from",
                 "type": "address"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "address",
                 "name": "to",
                 "type": "address"
@@ -46,7 +72,7 @@
             {
                 "indexed": false,
                 "internalType": "string",
-                "name": "contentIPFSHash",
+                "name": "contentHash",
                 "type": "string"
             },
             {
@@ -63,7 +89,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "address",
                 "name": "user",
                 "type": "address"
@@ -87,12 +113,12 @@
             },
             {
                 "internalType": "string",
-                "name": "contentIPFSHash",
+                "name": "ipfsHash",
                 "type": "string"
             },
             {
                 "internalType": "bool",
-                "name": "isEncrypted",
+                "name": "encrypted",
                 "type": "bool"
             }
         ],
@@ -110,12 +136,12 @@
             },
             {
                 "internalType": "string",
-                "name": "contentIPFSHash",
+                "name": "ipfsHash",
                 "type": "string"
             },
             {
                 "internalType": "bool",
-                "name": "isEncrypted",
+                "name": "encrypted",
                 "type": "bool"
             }
         ],
@@ -128,50 +154,16 @@
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "newAmount",
+                "name": "newRate",
                 "type": "uint256"
-            }
-        ],
-        "name": "setMinStakeAmount",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
+            },
             {
                 "internalType": "uint256",
                 "name": "newInterval",
                 "type": "uint256"
             }
         ],
-        "name": "setRewardInterval",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "newRate",
-                "type": "uint256"
-            }
-        ],
-        "name": "setRewardRate",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "username",
-                "type": "string"
-            }
-        ],
-        "name": "setUsername",
+        "name": "setRewardParameters",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -187,13 +179,13 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "address",
                 "name": "from",
                 "type": "address"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "address",
                 "name": "to",
                 "type": "address"
@@ -222,10 +214,55 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "newMinStake",
+                "type": "uint256"
+            }
+        ],
+        "name": "updateMinStake",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "newUsername",
+                "type": "string"
+            }
+        ],
+        "name": "updateUsername",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
                 "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "username",
+                "type": "string"
+            }
+        ],
+        "name": "UserRegistered",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
                 "internalType": "address",
                 "name": "user",
                 "type": "address"
@@ -244,7 +281,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "address",
                 "name": "user",
                 "type": "address"
@@ -263,7 +300,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "address",
                 "name": "user",
                 "type": "address"
@@ -271,30 +308,12 @@
             {
                 "indexed": false,
                 "internalType": "string",
-                "name": "username",
+                "name": "newUsername",
                 "type": "string"
             }
         ],
-        "name": "UsernameSet",
+        "name": "UsernameUpdated",
         "type": "event"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "tokenAddress",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "withdrawTokens",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
     },
     {
         "inputs": [
@@ -305,6 +324,25 @@
             }
         ],
         "name": "activeUsers",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "allUsers",
         "outputs": [
             {
                 "internalType": "address",
@@ -430,6 +468,50 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "getMessageDetails",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "receiver",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "content",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tipAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "encrypted",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "address",
                 "name": "user",
                 "type": "address"
@@ -493,6 +575,30 @@
                 "type": "address"
             }
         ],
+        "name": "getUserMessages",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "sent",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "received",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            }
+        ],
         "name": "getUserReceivedMessages",
         "outputs": [
             {
@@ -537,6 +643,50 @@
                 "internalType": "uint256",
                 "name": "",
                 "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            }
+        ],
+        "name": "getUserStats",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "messageCount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tipSent",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tipReceived",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "lastActive",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "stakeAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "isUserActive",
+                "type": "bool"
             }
         ],
         "stateMutability": "view",
@@ -612,12 +762,12 @@
                 "type": "address"
             }
         ],
-        "name": "isActiveUser",
+        "name": "lastRewardClaim",
         "outputs": [
             {
-                "internalType": "bool",
+                "internalType": "uint256",
                 "name": "",
-                "type": "bool"
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -694,6 +844,30 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "receivedMessages",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [],
         "name": "rewardInterval",
         "outputs": [
@@ -727,6 +901,30 @@
                 "internalType": "contract IERC20",
                 "name": "",
                 "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "sentMessages",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -785,6 +983,11 @@
                 "internalType": "uint256",
                 "name": "stakeAmount",
                 "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalRewards",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -815,43 +1018,24 @@
                 "internalType": "address",
                 "name": "",
                 "type": "address"
+            }
+        ],
+        "name": "userProfiles",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "username",
+                "type": "string"
             },
             {
                 "internalType": "uint256",
-                "name": "",
+                "name": "joinDate",
                 "type": "uint256"
-            }
-        ],
-        "name": "userReceivedMessages",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
             },
             {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "name": "userSentMessages",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
+                "internalType": "bool",
+                "name": "isActive",
+                "type": "bool"
             }
         ],
         "stateMutability": "view",

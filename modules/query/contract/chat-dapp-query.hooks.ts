@@ -31,7 +31,9 @@ import {
   getUserActivities,
   getUserTips,
   getAllUsersInfo,
+  getUserMessages,
 } from "./chat-dapp-query.contract";
+import { useUserChainInfo } from "../user/user.query";
 
 // Contract state query hooks
 export function useOwnerQuery() {
@@ -202,23 +204,23 @@ export function useUserReceivedMessagesQuery(address: string) {
 }
 
 // Message query hooks
-export function useMessageQuery(messageId: number) {
-  return useQuery({
-    queryKey: queryKeys.messages.message(messageId),
-    queryFn: async (): Promise<{
-      sender: string;
-      receiver: string;
-      contentIPFSHash: string;
-      timestamp: number;
-      tipAmount: number;
-      isEncrypted: boolean;
-    }> => {
-      return await getMessage({ messageId });
-    },
-    enabled: messageId !== undefined && messageId >= 0,
-    refetchInterval: 60000, // refetch every minute
-  });
-}
+// export function useMessageQuery(messageId: number) {
+//   return useQuery({
+//     queryKey: queryKeys.messages.message(messageId),
+//     queryFn: async (): Promise<{
+//       sender: string;
+//       receiver: string;
+//       contentIPFSHash: string;
+//       timestamp: number;
+//       tipAmount: number;
+//       isEncrypted: boolean;
+//     }> => {
+//       return await getMessage({ messageId });
+//     },
+//     enabled: messageId !== undefined && messageId >= 0,
+//     refetchInterval: 60000, // refetch every minute
+//   });
+// }
 
 export function useMessageByIndexQuery(messageId: number) {
   return useQuery({
@@ -388,14 +390,73 @@ export function useUserTipsQuery(address: string) {
 export function useAllUsersInfoQuery() {
   return useQuery({
     queryKey: queryKeys.user.allUsersInfo,
-    queryFn: async (): Promise<Array<{
-      address: string;
-      username: string;
-      stakedAmount: number;
-    }>> => {
+    queryFn: async (): Promise<
+      Array<{
+        address: string;
+        username: string;
+        stakedAmount: number;
+      }>
+    > => {
       return await getAllUsersInfo();
     },
     // refetchInterval: 30000, // refetch every 30 seconds
     refetchInterval: 5000,
   });
 }
+
+export function useUserMessagesQuery() {
+  const { account } = useUserChainInfo();
+  const address = account?.address;
+
+  return useQuery({
+    queryKey: queryKeys.user.userMessages,
+    queryFn: async (): Promise<{
+      receivedMessages: Message[];
+      sentMessages: Message[];
+    }> => {
+      console.log("user userMessagesQuery", address);
+      if (!address) {
+        return { receivedMessages: [], sentMessages: [] };
+      }
+
+      const userMessages = await getUserMessages({ address });
+
+      const received = userMessages.received;
+      const sent = userMessages.sent;
+
+      const updatedReceived = await Promise.all(
+        received.map(async (rec) => {
+          const message = await getMessage({ messageId: rec });
+
+          return message;
+        })
+      );
+
+      const updatedSent = await Promise.all(
+        sent.map(async (sen) => {
+          const message = await getMessage({ messageId: sen });
+
+          return message;
+        })
+      );
+
+      return {
+        receivedMessages: updatedReceived as Message[],
+        sentMessages: updatedSent as Message[],
+      };
+    },
+    enabled: !!address,
+    refetchInterval: 5000,
+  });
+}
+
+type Message = {
+  sender: string;
+  receiver: string;
+  contentIPFSHash: string;
+  timestamp: number;
+  tipAmount: number;
+  isEncrypted: boolean;
+  senderUsername: string;
+  receiverUsername: string;
+};

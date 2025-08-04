@@ -22,19 +22,19 @@ export function prepareStake({ amount }: { amount: number }) {
   });
 }
 
-export function prepareUnstake() {
+export function prepareUnstake({ amount }: { amount: number }) {
   return prepareContractCall({
     contract: chatContractInterface,
-    method: "function unstake()",
-    params: [],
+    method: "function unstake(uint256 amount)",
+    params: [toWei(amount.toString())],
   });
 }
 
 // Username functions
-export function prepareSetUsername({ username }: { username: string }) {
+export function prepareRegisterUser({ username }: { username: string }) {
   return prepareContractCall({
     contract: chatContractInterface,
-    method: "function setUsername(string calldata username)",
+    method: "function registerUser(string calldata username)",
     params: [username],
   });
 }
@@ -42,37 +42,37 @@ export function prepareSetUsername({ username }: { username: string }) {
 // Message functions
 export function prepareSendMessage({
   receiver,
-  contentIPFSHash,
-  isEncrypted,
+  ipfsHash,
+  encrypted,
 }: {
   receiver: string;
-  contentIPFSHash: string;
-  isEncrypted: boolean;
+  ipfsHash: string;
+  encrypted: boolean;
 }) {
   return prepareContractCall({
     contract: chatContractInterface,
     method:
-      "function sendMessage(address receiver, string contentIPFSHash, bool isEncrypted)",
-    params: [receiver, contentIPFSHash, isEncrypted],
+      "function sendMessage(address receiver, string calldata ipfsHash, bool encrypted)",
+    params: [receiver, ipfsHash, encrypted],
   });
 }
 
 export function prepareSendMessageWithTip({
   receiver,
-  contentIPFSHash,
-  isEncrypted,
+  ipfsHash,
+  encrypted,
   value,
 }: {
   receiver: string;
-  contentIPFSHash: string;
-  isEncrypted: boolean;
+  ipfsHash: string;
+  encrypted: boolean;
   value: bigint;
 }) {
   return prepareContractCall({
     contract: chatContractInterface,
     method:
-      "function sendMessageWithTip(address receiver, string contentIPFSHash, bool isEncrypted) payable",
-    params: [receiver, contentIPFSHash, isEncrypted],
+      "function sendMessageWithTip(address receiver, string calldata ipfsHash, bool encrypted) payable",
+    params: [receiver, ipfsHash, encrypted],
     value,
   });
 }
@@ -87,44 +87,49 @@ export function prepareClaimRewards() {
 }
 
 // Admin functions
-export function prepareSetMinStakeAmount({ newAmount }: { newAmount: number }) {
+export function prepareUpdateMinStake({
+  newMinStake,
+}: {
+  newMinStake: number;
+}) {
   return prepareContractCall({
     contract: chatContractInterface,
-    method: "function setMinStakeAmount(uint256 newAmount)",
-    params: [BigInt(newAmount)],
+    method: "function updateMinStake(uint256 newMinStake)",
+    params: [BigInt(newMinStake)],
   });
 }
 
-export function prepareSetRewardRate({ newRate }: { newRate: number }) {
-  return prepareContractCall({
-    contract: chatContractInterface,
-    method: "function setRewardRate(uint256 newRate)",
-    params: [BigInt(newRate)],
-  });
-}
-
-export function prepareSetRewardInterval({
+export function prepareSetRewardParameters({
+  newRate,
   newInterval,
 }: {
+  newRate: number;
   newInterval: number;
 }) {
   return prepareContractCall({
     contract: chatContractInterface,
-    method: "function setRewardInterval(uint256 newInterval)",
-    params: [BigInt(newInterval)],
+    method:
+      "function setRewardParameters(uint256 newRate, uint256 newInterval)",
+    params: [BigInt(newRate), BigInt(newInterval)],
   });
 }
 
-export function prepareWithdrawTokens({
-  tokenAddress,
-  amount,
+export function prepareEmergencyWithdraw({ token }: { token: string }) {
+  return prepareContractCall({
+    contract: chatContractInterface,
+    method: "function emergencyWithdraw(address token)",
+    params: [token],
+  });
+}
+
+export function prepareUpdateUsername({
+  newUsername,
 }: {
-  tokenAddress: string;
-  amount: number;
+  newUsername: string;
 }) {
   return prepareContractCall({
     contract: chatContractInterface,
-    method: "function withdrawTokens(address tokenAddress, uint256 amount)",
-    params: [tokenAddress, BigInt(amount)],
+    method: "function updateUsername(string calldata newUsername)",
+    params: [newUsername],
   });
 }

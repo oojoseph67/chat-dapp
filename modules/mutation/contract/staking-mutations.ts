@@ -83,7 +83,7 @@ export function useUnstakeMutation() {
         throw new Error("No active account found");
       }
 
-      const transaction = prepareUnstake();
+      const transaction = prepareUnstake({ amount });
 
       const transactionReceipt = await sendAndConfirmTransaction({
         account,

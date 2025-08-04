@@ -1,4 +1,4 @@
-import { useSetUsernameMutation } from "@/modules/mutation";
+import { useRegisterUserMutation } from "@/modules/mutation";
 import { useUserChainInfo, useUserUsernameQuery } from "@/modules/query";
 import { useState, useEffect } from "react";
 
@@ -14,7 +14,7 @@ export function ProfileSettings() {
 
   console.log({ userUsername });
 
-  const { mutate: setUsernameMutation } = useSetUsernameMutation();
+  const { mutate: registerUserMutation } = useRegisterUserMutation();
 
   // Load bio from localStorage on component mount
   useEffect(() => {
@@ -25,7 +25,7 @@ export function ProfileSettings() {
   }, []);
 
   const handleSaveUsername = () => {
-    setUsernameMutation({ username });
+    registerUserMutation({ username });
   };
 
   const handleSave = () => {

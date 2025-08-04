@@ -13,12 +13,15 @@ import {
   IoWalletOutline,
   IoCheckmarkDoneOutline,
   IoCloseOutline,
+  IoDocumentOutline,
+  IoImageOutline,
 } from "react-icons/io5";
 import {
   useUserChainInfo,
   useUserSentMessagesQuery,
   useUserReceivedMessagesQuery,
   useAllUsersInfoQuery,
+  useUserMessagesQuery,
 } from "@/modules/query";
 import {
   useSendMessageMutation,
@@ -26,6 +29,7 @@ import {
 } from "@/modules/mutation";
 import { WalletWarning } from "@/modules/app/component/wallet-warning";
 import { StakingRequirement } from "@/modules/app/component/staking-requirement";
+import { parseMessageContent, MessageMetadata } from "@/utils/global";
 
 export default function Messages() {
   const { account } = useUserChainInfo();
@@ -41,18 +45,11 @@ export default function Messages() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isEncrypted, setIsEncrypted] = useState<boolean>(false);
 
-  // Get all users info in a single query
   const { data: allUsersInfo = [] } = useAllUsersInfoQuery();
+  const { data: userMessages } = useUserMessagesQuery();
 
-  // Get current user's sent and received messages
-  const { data: userSentMessages = [] } = useUserSentMessagesQuery(
-    address || ""
-  );
-  const { data: userReceivedMessages = [] } = useUserReceivedMessagesQuery(
-    address || ""
-  );
+  console.log({ userMessages });
 
-  // Create friends list from users with message history
   const friends = useMemo(() => {
     return allUsersInfo
       .filter((user) => user.address !== address)
@@ -67,7 +64,6 @@ export default function Messages() {
       }));
   }, [allUsersInfo, address]);
 
-  // Set selected friend from URL params or default to first friend
   useEffect(() => {
     if (recipient && typeof recipient === "string") {
       setSelectedFriend(recipient);
@@ -78,20 +74,125 @@ export default function Messages() {
 
   const selectedFriendData = friends.find((f) => f.address === selectedFriend);
 
-  // Get messages for selected friend (placeholder for now)
-  const messages = useMemo(() => {
-    if (!selectedFriend) return [];
+  // Message content component
+  function MessageContent({ ipfsHash, isEncrypted }: { ipfsHash: string; isEncrypted: boolean }) {
+    const [content, setContent] = useState<MessageMetadata | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    return [
-      {
-        id: 1,
-        sender: selectedFriendData?.name || "User",
-        content: "Start a conversation by sending a message!",
-        time: "Just now",
-        isOwn: false,
-      },
-    ];
-  }, [selectedFriend, selectedFriendData]);
+    useEffect(() => {
+      if (!ipfsHash) return;
+
+      setLoading(true);
+      setError(null);
+
+      parseMessageContent(ipfsHash)
+        .then((result) => {
+          setContent(result);
+          if (!result) {
+            setError('Failed to load content');
+          }
+        })
+        .catch((err) => {
+          console.error('Error loading IPFS content:', err);
+          setError('Failed to load content');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }, [ipfsHash]);
+
+    // if (isEncrypted) {
+    //   return (
+    //     <div className="flex items-center space-x-2 text-gray-500">
+    //       <IoDocumentOutline className="w-4 h-4" />
+    //       <span>🔒 Encrypted message</span>
+    //     </div>
+    //   );
+    // }
+
+    if (loading) {
+      return (
+        <div className="flex items-center space-x-2 text-gray-500">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+          <span>Loading...</span>
+        </div>
+      );
+    }
+
+    if (error || !content) {
+      return (
+        <div className="text-red-500 text-sm">
+          {error || 'Failed to load content'}
+        </div>
+      );
+    }
+
+    if (content.type === 'file') {
+      return (
+        <div className="flex items-center space-x-2">
+          {content.mimeType?.startsWith('image/') ? (
+            <IoImageOutline className="w-4 h-4 text-blue-500" />
+          ) : (
+            <IoDocumentOutline className="w-4 h-4 text-gray-500" />
+          )}
+          <span className="text-sm">
+            {content.fileName || 'File'} 
+            {content.fileSize && ` (${(content.fileSize / 1024).toFixed(1)} KB)`}
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="text-sm">
+        {content.content || 'No content'}
+      </div>
+    );
+  }
+
+  // Get messages for selected friend
+  const messages = useMemo(() => {
+    if (!selectedFriend || !userMessages) return [];
+
+    // Handle both old and new data structure
+    const receivedMessages = userMessages.receivedMessages;
+    const sentMessages = userMessages.sentMessages;
+
+    // Filter messages for the selected friend
+    const filteredReceived = receivedMessages.filter(
+      (msg) => msg.sender === selectedFriend
+    );
+    const filteredSent = sentMessages.filter(
+      (msg) => msg.receiver === selectedFriend
+    );
+
+    // Combine and sort messages by timestamp
+    const allMessages = [...filteredReceived, ...filteredSent].sort(
+      (a, b) => a.timestamp - b.timestamp
+    );
+
+    // Transform messages to display format with user's perspective
+    return allMessages.map((msg) => {
+      const isOwn = msg.sender === address;
+      const senderName = isOwn ? "You" : msg.senderUsername;
+      const time = new Date(msg.timestamp * 1000).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      return {
+        id: `${msg.sender}-${msg.receiver}-${msg.timestamp}`,
+        sender: senderName,
+        content: msg.contentIPFSHash,
+        time,
+        isOwn,
+        timestamp: msg.timestamp,
+        tipAmount: msg.tipAmount,
+        isEncrypted: msg.isEncrypted,
+      };
+    });
+  }, [selectedFriend, userMessages, address]);
 
   // Message mutations
   const { mutate: sendMessage, isPending: isSendingMessage } =
@@ -139,14 +240,6 @@ export default function Messages() {
     }
   };
 
-  const handleTip = () => {
-    if (!selectedFriend) return;
-
-    // Open tip modal or switch to tip mode
-    setIsTipMode(true);
-    setTipAmount(0);
-  };
-
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -158,15 +251,11 @@ export default function Messages() {
     setSelectedFile(null);
   };
 
-  const filteredFriends = friends.filter((friend) =>
-    friend.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  console.log({
-    userSentMessages,
-    userReceivedMessages,
-    allUsersInfo,
-    messages,
+  const filteredFriends = friends.filter((friend) => {
+    const query = searchQuery.toLowerCase();
+    const nameMatch = friend.name.toLowerCase().includes(query);
+    const addressMatch = friend.address.toLowerCase().includes(query);
+    return nameMatch || addressMatch;
   });
 
   return (
@@ -235,7 +324,8 @@ export default function Messages() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p className="font-medium text-gray-900 dark:text-white truncate">
-                          {friend.name}
+                          {friend.name} [{friend.address.slice(0, 6)}...
+                          {friend.address.slice(-4)}]
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                           <IoTimeOutline className="w-3 h-3 mr-1" />
@@ -278,7 +368,9 @@ export default function Messages() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {selectedFriendData.name}
+                        {selectedFriendData.name} [
+                        {selectedFriendData.address.slice(0, 6)}...
+                        {selectedFriendData.address.slice(-4)}]
                       </h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {selectedFriendData.online ? "Online" : "Offline"}
@@ -319,7 +411,7 @@ export default function Messages() {
                             : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                         }`}
                       >
-                        <p className="text-sm">{msg.content}</p>
+                        <MessageContent ipfsHash={msg.content} isEncrypted={msg.isEncrypted} />
                         <p
                           className={`text-xs mt-1 ${
                             msg.isOwn

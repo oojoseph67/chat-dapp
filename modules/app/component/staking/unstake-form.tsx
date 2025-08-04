@@ -14,6 +14,7 @@ export function UnstakeForm() {
     useStakedAmountQuery(address || "");
   const { data: totalEarned = 0, isLoading: isRewardsLoading } =
     useCalculateRewardsQuery(address || "");
+    
   const unstakeMutation = useUnstakeMutation();
 
   const [unstakeAmount, setUnstakeAmount] = useState("");
@@ -23,8 +24,17 @@ export function UnstakeForm() {
 
   const handleUnstake = () => {
     if (!unstakeAmount || parseFloat(unstakeAmount) <= 0) return;
-    unstakeMutation.mutate({ amount: parseFloat(unstakeAmount) });
-    setUnstakeAmount("");
+    unstakeMutation.mutate(
+      { amount: parseFloat(unstakeAmount) },
+      {
+        onSuccess() {
+          setUnstakeAmount("");
+        },
+        onError() {
+          setUnstakeAmount("");
+        },
+      }
+    );
   };
 
   return (

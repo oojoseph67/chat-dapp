@@ -20,6 +20,7 @@ export const queryKeys = {
     tips: (address: string) => ["user", "tips", address] as const,
     stakedAmountByAddress: (address: string) => ["user", "stakedAmountByAddress", address] as const,
     allUsersInfo: ["user", "allUsersInfo"] as const,
+    userMessages: ["user-mess", "userMessages"] as const,
   },
   contract: {
     owner: ["contract", "owner"] as const,
@@ -34,5 +35,6 @@ export const queryKeys = {
   messages: {
     message: (messageId: number) => ["messages", "message", messageId] as const,
     messageByIndex: (messageId: number) => ["messages", "messageByIndex", messageId] as const,
+    messageDetails: (messageId: number) => ["messages", "messageDetails", messageId] as const,
   },
 };
