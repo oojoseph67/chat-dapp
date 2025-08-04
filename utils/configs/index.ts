@@ -66,7 +66,9 @@ export const chatContractMainnet = "";
 export const usdtContractTestnet = "0xc89016a86ccEE9365e893f294f74E81a5A3AB559";
 export const usdtContractMainnet = "";
 
-export const usdtContract = "";
+export const usdtContract = IS_TESTNET
+  ? usdtContractTestnet
+  : usdtContractMainnet;
 
 export const chatContract = IS_TESTNET
   ? chatContractTestnet
