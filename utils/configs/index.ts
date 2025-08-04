@@ -61,10 +61,10 @@ export const chain1Mainnet = defineChain({
 });
 
 export const chatContractTestnet = "0xEfa1D9CdC8021096985f8be3935e3cEbC302a98f";
-export const chatContractMainnet = "";
+export const chatContractMainnet = "0xcdE6261982D2DB3e02ac74A193B1D8492d884398";
 
 export const usdtContractTestnet = "0xc89016a86ccEE9365e893f294f74E81a5A3AB559";
-export const usdtContractMainnet = "";
+export const usdtContractMainnet = "0x38e88b1ed92065ed20241a257ef3713a131c9155";
 
 export const usdtContract = IS_TESTNET
   ? usdtContractTestnet

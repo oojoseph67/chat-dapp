@@ -192,3 +192,158 @@ export function sanitizeUsernameForDisplay(username: string): string {
   
   return username;
 }
+
+// Analytics utility functions
+export const calculateEngagementRate = (messageCount: number, totalMessages: number): string => {
+  return totalMessages > 0 ? ((messageCount / totalMessages) * 100).toFixed(1) : "0";
+};
+
+export const calculateTotalTips = (tipStats: { sent: number; received: number }): number => {
+  return tipStats.sent + tipStats.received;
+};
+
+export const processRecentActivity = (userMessages: any, sanitizeUsernameForDisplay: (username: string) => string) => {
+  if (!userMessages) return [];
+
+  return [
+    ...userMessages.sentMessages.slice(0, 2).map((msg: any, index: number) => ({
+      id: `sent-${index}`,
+      type: "message" as const,
+      description: `Sent message to ${
+        sanitizeUsernameForDisplay(msg.receiverUsername) ||
+        msg.receiver.slice(0, 8)
+      }...`,
+      time: new Date(msg.timestamp * 1000).toLocaleString(),
+      value: msg.tipAmount > 0 ? `+${msg.tipAmount} tip` : "+1",
+      hasTip: msg.tipAmount > 0,
+      tipAmount: msg.tipAmount,
+    })),
+    ...userMessages.receivedMessages.slice(0, 2).map((msg: any, index: number) => ({
+      id: `received-${index}`,
+      type: "message" as const,
+      description: `Received message from ${
+        sanitizeUsernameForDisplay(msg.senderUsername) ||
+        msg.sender.slice(0, 8)
+      }...`,
+      time: new Date(msg.timestamp * 1000).toLocaleString(),
+      value: msg.tipAmount > 0 ? `+${msg.tipAmount} tip` : "+1",
+      hasTip: msg.tipAmount > 0,
+      tipAmount: msg.tipAmount,
+    })),
+  ].slice(0, 4);
+};
+
+export const processTopFriends = (allUsersInfo: any[], address: string, sanitizeUsernameForDisplay: (username: string) => string) => {
+  return allUsersInfo
+    .filter((user) => user.address !== address)
+    .sort((a, b) => (b.stakedAmount || 0) - (a.stakedAmount || 0))
+    .slice(0, 4)
+    .map((user, index) => ({
+      name:
+        sanitizeUsernameForDisplay(user.username) ||
+        user.address.slice(0, 8) + "...",
+      messages: Math.floor(Math.random() * 50) + 10, // Mock message count since not available in contract
+      avatar: user.username
+        ? sanitizeUsernameForDisplay(user.username).slice(0, 2).toUpperCase()
+        : user.address.slice(2, 4).toUpperCase(),
+      stakedAmount: user.stakedAmount || 0,
+    }));
+};
+
+export const generateAnalyticsStats = (
+  address: string | undefined,
+  messageCount: number,
+  activeUsersCount: number,
+  stakedAmount: number,
+  tipStats: { sent: number; received: number },
+  isMessageCountLoading: boolean,
+  isActiveUsersLoading: boolean,
+  isStakedAmountLoading: boolean,
+  isTipStatsLoading: boolean
+) => {
+  return [
+    {
+      title: "Total Messages",
+      value: address ? messageCount.toString() : "0",
+      change: address ? "+12.5%" : "0%", // Mock change since historical data not available
+      trend: (address ? "up" : "down") as "up" | "down",
+      icon: "IoChatbubbleOutline",
+      color: "blue",
+      isLoading: isMessageCountLoading,
+    },
+    {
+      title: "Active Friends",
+      value: address ? activeUsersCount.toString() : "0",
+      change: address ? "+8.2%" : "0%", // Mock change
+      trend: (address ? "up" : "down") as "up" | "down",
+      icon: "IoPeopleOutline",
+      color: "green",
+      isLoading: isActiveUsersLoading,
+    },
+    {
+      title: "Tokens Staked",
+      value: address ? stakedAmount.toString() : "0",
+      change: address ? "+15.3%" : "0%", // Mock change
+      trend: (address ? "up" : "down") as "up" | "down",
+      icon: "IoWalletOutline",
+      color: "purple",
+      isLoading: isStakedAmountLoading,
+    },
+    {
+      title: "Tips Received",
+      value: address ? tipStats.received.toString() : "0",
+      change: address ? "+5.2%" : "0%", // Mock change
+      trend: (address ? "up" : "down") as "up" | "down",
+      icon: "IoGiftOutline",
+      color: "yellow",
+      isLoading: isTipStatsLoading,
+    },
+  ];
+};
+
+// Message grouping utility functions
+export const groupMessagesByDay = (messages: any[]) => {
+  const groups: { [key: string]: any[] } = {};
+  
+  messages.forEach((message) => {
+    const date = new Date(message.timestamp * 1000);
+    const dateKey = date.toDateString(); // This gives us a unique key for each day
+    
+    if (!groups[dateKey]) {
+      groups[dateKey] = [];
+    }
+    groups[dateKey].push(message);
+  });
+  
+  return groups;
+};
+
+export const formatDateHeader = (dateString: string): string => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  // Check if it's today
+  if (date.toDateString() === today.toDateString()) {
+    return "Today";
+  }
+  
+  // Check if it's yesterday
+  if (date.toDateString() === yesterday.toDateString()) {
+    return "Yesterday";
+  }
+  
+  // For other dates, show the day and month
+  return date.toLocaleDateString('en-US', { 
+    weekday: 'long',
+    month: 'short', 
+    day: 'numeric' 
+  });
+};
+
+export const sortDateGroups = (groups: { [key: string]: any[] }) => {
+  return Object.keys(groups).sort((a, b) => {
+    return new Date(a).getTime() - new Date(b).getTime();
+  });
+};

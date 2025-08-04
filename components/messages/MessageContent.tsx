@@ -22,7 +22,16 @@ interface MessageContentProps {
 }
 
 export function MessageContent({ message }: MessageContentProps) {
-  const { content, messageType, ipfsContent, isEncrypted, tipAmount, isOwn, sender, receiver } = message;
+  const {
+    content,
+    messageType,
+    ipfsContent,
+    isEncrypted,
+    tipAmount,
+    isOwn,
+    sender,
+    receiver,
+  } = message;
 
   if (messageType === "loading") {
     return (
@@ -53,12 +62,14 @@ export function MessageContent({ message }: MessageContentProps) {
   return (
     <div className="space-y-2">
       <div className="text-sm">{content}</div>
-      {tipAmount && tipAmount > 0 && (
-        <div className={`flex items-center space-x-1 text-xs ${
-          isOwn 
-            ? "text-green-600 dark:text-green-400" 
-            : "text-yellow-600 dark:text-yellow-400"
-        }`}>
+      {tipAmount !== undefined && tipAmount > 0 && (
+        <div
+          className={`flex items-center space-x-1 text-xs ${
+            isOwn
+              ? "text-green-600 dark:text-green-400"
+              : "text-yellow-600 dark:text-yellow-400"
+          }`}
+        >
           <IoGiftOutline className="w-3 h-3" />
           <span>
             {isOwn ? "Sent tip" : "Received tip"}: {tipAmount} XFI
