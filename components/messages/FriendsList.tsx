@@ -1,17 +1,7 @@
 import { useMemo, useEffect } from "react";
 import { IoSearchOutline, IoTimeOutline } from "react-icons/io5";
-import { useAllUsersInfoQuery } from "@/modules/query";
+import { useAllUsersInfoQuery, useUserMessagesQuery } from "@/modules/query";
 import { useUserChainInfo } from "@/modules/query";
-
-interface Friend {
-  address: string;
-  name: string;
-  avatar: string;
-  lastMessage: string;
-  time: string;
-  unread: number;
-  online: boolean;
-}
 
 interface FriendsListProps {
   selectedFriend: string | null;
@@ -29,20 +19,76 @@ export function FriendsList({
   const { account } = useUserChainInfo();
   const address = account?.address;
   const { data: allUsersInfo = [] } = useAllUsersInfoQuery();
+  const { data: userMessages } = useUserMessagesQuery();
 
   const friends = useMemo(() => {
     return allUsersInfo
       .filter((user) => user.address !== address)
-      .map((user) => ({
-        address: user.address,
-        name: user.username,
-        avatar: user.username.slice(0, 2).toUpperCase(),
-        lastMessage: "Start a conversation",
-        time: "Just now",
-        unread: 0,
-        online: true,
-      }));
-  }, [allUsersInfo, address]);
+      .map((user) => {
+        // Get messages for this friend
+        let lastMessage = "Start a conversation";
+        let lastMessageTime = "Just now";
+
+        if (userMessages) {
+          const receivedMessages = userMessages.receivedMessages;
+          const sentMessages = userMessages.sentMessages;
+
+          // Filter messages for this specific friend
+          const filteredReceived = receivedMessages.filter(
+            (msg) => msg.sender === user.address
+          );
+          const filteredSent = sentMessages.filter(
+            (msg) => msg.receiver === user.address
+          );
+
+          // Combine and sort messages by timestamp
+          const allMessages = [...filteredReceived, ...filteredSent].sort(
+            (a, b) => a.timestamp - b.timestamp
+          );
+
+          if (allMessages.length > 0) {
+            const lastMsg = allMessages[allMessages.length - 1];
+
+            // Extract content from ipfsContent
+            if (lastMsg.ipfsContent) {
+              if (lastMsg.ipfsContent.content) {
+                lastMessage = lastMsg.ipfsContent.content;
+              } else if (lastMsg.ipfsContent.file) {
+                lastMessage = "File shared";
+              } else {
+                lastMessage = "Message";
+              }
+            } else {
+              lastMessage = "Message";
+            }
+
+            // Format timestamp
+            const messageDate = new Date(lastMsg.timestamp * 1000);
+            const now = new Date();
+            const diffInHours =
+              (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
+
+            if (diffInHours < 1) {
+              lastMessageTime = "Just now";
+            } else if (diffInHours < 24) {
+              lastMessageTime = `${Math.floor(diffInHours)}h ago`;
+            } else {
+              lastMessageTime = messageDate.toLocaleDateString();
+            }
+          }
+        }
+
+        return {
+          address: user.address,
+          name: user.username,
+          avatar: user.username.slice(0, 2).toUpperCase(),
+          lastMessage,
+          time: lastMessageTime,
+          unread: 0,
+          online: true,
+        };
+      });
+  }, [allUsersInfo, address, userMessages]);
 
   const filteredFriends = friends.filter((friend) => {
     const query = searchQuery.toLowerCase();
@@ -126,4 +172,4 @@ export function FriendsList({
       </div>
     </div>
   );
-} 
+}

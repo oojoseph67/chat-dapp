@@ -13,6 +13,15 @@ import { getContractCustom } from "@/modules/blockchain";
 import { chatContract } from "@/utils/configs";
 import ChatContractABI from "@/modules/blockchain/abi/chat-dapp.json";
 
+export interface MessageMetadata {
+  name: string;
+  description: string;
+  file?: string;
+  content?: string;
+  timestamp: number;
+  isEncrypted: boolean;
+}
+
 // Message mutations
 export function useSendMessageMutation() {
   const { account } = useUserChainInfo();
@@ -42,78 +51,78 @@ export function useSendMessageMutation() {
 
       console.log({ chatContractInterface });
 
-      let contentIPFSHash =
-        "ipfs://QmRiHZzXW2CezXdXLqy2U5j3uvwQ8qV6XGtuRtHtnjNByQ";
-      // let contentIPFSHash = "";
+      // let contentIPFSHash =
+      //   "ipfs://QmRiHZzXW2CezXdXLqy2U5j3uvwQ8qV6XGtuRtHtnjNByQ";
+      let contentIPFSHash = "";
 
-      // if (file) {
-      //   // Upload file to IPFS
-      //   const fileURI = await upload({
-      //     client: client,
-      //     files: [file],
-      //     uploadWithoutDirectory: true,
-      //   });
+      if (file) {
+        // Upload file to IPFS
+        const fileURI = await upload({
+          client: client,
+          files: [file],
+          uploadWithoutDirectory: true,
+        });
 
-      //   if (!fileURI) throw new Error("Failed to upload file to IPFS");
+        if (!fileURI) throw new Error("Failed to upload file to IPFS");
 
-      //   // Create metadata and upload to IPFS
-      //   const metadata = {
-      //     name: `Message from ${account.address} to ${receiver}`,
-      //     description: "Chat message",
-      //     file: fileURI,
-      //     timestamp: Date.now(),
-      //     isEncrypted,
-      //   };
+        // Create metadata and upload to IPFS
+        const metadata: MessageMetadata = {
+          name: `Message from ${account.address} to ${receiver}`,
+          description: "Chat message",
+          file: fileURI,
+          timestamp: Date.now(),
+          isEncrypted,
+        };
 
-      //   const metadataURI = await upload({
-      //     client: client,
-      //     files: [
-      //       {
-      //         name: `message-${Math.random()}.json`,
-      //         data: JSON.stringify(metadata),
-      //       },
-      //     ],
-      //     uploadWithoutDirectory: true,
-      //   });
+        const metadataURI = await upload({
+          client: client,
+          files: [
+            {
+              name: `message-${Math.random()}.json`,
+              data: JSON.stringify(metadata),
+            },
+          ],
+          uploadWithoutDirectory: true,
+        });
 
-      //   if (!metadataURI) throw new Error("Failed to upload metadata to IPFS");
-      //   contentIPFSHash = metadataURI;
-      // } else if (content) {
-      //   // Upload text content to IPFS
-      //   const metadata = {
-      //     name: `Message from ${account.address} to ${receiver}`,
-      //     description: "Chat message",
-      //     content,
-      //     timestamp: Date.now(),
-      //     isEncrypted,
-      //   };
+        if (!metadataURI) throw new Error("Failed to upload metadata to IPFS");
+        contentIPFSHash = metadataURI;
+      } else if (content) {
+        // Upload text content to IPFS
+        const metadata: MessageMetadata = {
+          name: `Message from ${account.address} to ${receiver}`,
+          description: "Chat message",
+          content,
+          timestamp: Date.now(),
+          isEncrypted,
+        };
 
-      //   console.log({ content });
-      //   console.log({ receiver });
-      //   console.log({ metadata });
+        console.log({ content });
+        console.log({ receiver });
+        console.log({ metadata });
 
-      //   const metadataURI = await upload({
-      //     client: client,
-      //     files: [
-      //       {
-      //         name: `message-${Math.random()}.json`,
-      //         data: JSON.stringify(metadata),
-      //       },
-      //     ],
-      //     uploadWithoutDirectory: true,
-      //   });
+        const metadataURI = await upload({
+          client: client,
+          files: [
+            {
+              name: `message-${Math.random()}.json`,
+              data: JSON.stringify(metadata),
+            },
+          ],
+          uploadWithoutDirectory: true,
+        });
 
-      //   console.log({ metadataURI });
+        console.log({ metadataURI });
 
-      //   if (!metadataURI) throw new Error("Failed to upload content to IPFS");
-      //   contentIPFSHash = metadataURI;
-      // } else {
-      //   throw new Error("Either content or file must be provided");
-      // }
+        if (!metadataURI) throw new Error("Failed to upload content to IPFS");
+        contentIPFSHash = metadataURI;
+      } else {
+        throw new Error("Either content or file must be provided");
+      }
 
-      console.log({ contentIPFSHash });
-      contentIPFSHash = contentIPFSHash.replace("ipfs://", "");
-      console.log({ contentIPFSHash });
+      // console.log({ contentIPFSHash });
+      // contentIPFSHash = contentIPFSHash.replace("ipfs://", "");
+      // console.log({ contentIPFSHash });
 
       const transaction = prepareSendMessage({
         receiver,

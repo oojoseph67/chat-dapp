@@ -1,9 +1,15 @@
 import { useState } from "react";
-import { IoSendOutline, IoAttachOutline, IoCloseOutline } from "react-icons/io5";
+import {
+  IoSendOutline,
+  IoAttachOutline,
+  IoCloseOutline,
+} from "react-icons/io5";
 import {
   useSendMessageMutation,
   useSendMessageWithTipMutation,
 } from "@/modules/mutation";
+import { download } from "thirdweb/storage";
+import { client } from "@/utils/configs";
 
 interface MessageInputProps {
   selectedFriend: string | null;
@@ -72,6 +78,18 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
   const handleRemoveFile = () => {
     setSelectedFile(null);
   };
+
+  const handleDownloadFile = async () => {
+    const file = await download({
+      client,
+      uri: "ipfs://QmZFB4EbrfMA7QugWwFbezpux1Vs66zfnq1qQ4t6tTxTFw",
+    });
+
+    console.log({ file });
+  };
+
+  console.log({ message });
+
   return (
     <div className="p-4 border-t border-gray-200 dark:border-gray-700">
       {/* File Upload Preview */}
@@ -81,8 +99,7 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
             <div className="flex items-center space-x-2">
               <IoAttachOutline className="w-4 h-4 text-blue-600" />
               <span className="text-sm text-blue-700 dark:text-blue-300">
-                {selectedFile.name} (
-                {(selectedFile.size / 1024).toFixed(1)} KB)
+                {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
               </span>
             </div>
             <button
@@ -111,7 +128,7 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
           </span>
         </label>
 
-        <label className="flex items-center space-x-2">
+        {/* <label className="flex items-center space-x-2">
           <input
             type="checkbox"
             checked={isEncrypted}
@@ -121,7 +138,7 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
           <span className="text-sm text-gray-700 dark:text-gray-300">
             Encrypt message
           </span>
-        </label>
+        </label> */}
       </div>
 
       {/* Tip Amount Input */}
@@ -158,26 +175,22 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
           <input
             type="text"
             placeholder={
-              selectedFile
-                ? "Add a message (optional)..."
-                : "Type a message..."
+              selectedFile ? "Add a message (optional)..." : "Type a message..."
             }
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) =>
-              e.key === "Enter" && handleSendMessage()
-            }
+            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
 
         <button
-          onClick={handleSendMessage}
-          disabled={
-            (!message.trim() && !selectedFile) ||
-            isSendingMessage ||
-            isSendingWithTip
-          }
+          onClick={handleDownloadFile}
+          //   disabled={
+          //     (!message.trim() && !selectedFile) ||
+          //     isSendingMessage ||
+          //     isSendingWithTip
+          //   }
           className="p-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           aria-label="Send message"
         >
@@ -190,4 +203,4 @@ export function MessageInput({ selectedFriend }: MessageInputProps) {
       </div>
     </div>
   );
-} 
+}

@@ -220,7 +220,6 @@ export async function getMessage({ messageId }: { messageId: number }): Promise<
   });
 
   const getMessage = await ethersContract.getMessage(messageId);
-  console.log({ getMessage });
 
   // Extract the message data from the tuple
   const messageData = getMessage[0];

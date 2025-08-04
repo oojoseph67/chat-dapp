@@ -34,6 +34,10 @@ import {
   getUserMessages,
 } from "./chat-dapp-query.contract";
 import { useUserChainInfo } from "../user/user.query";
+import { download } from "thirdweb/storage";
+import { client } from "@/utils/configs";
+import axios from "axios";
+import { MessageMetadata } from "@/modules/mutation";
 
 // Contract state query hooks
 export function useOwnerQuery() {
@@ -414,7 +418,6 @@ export function useUserMessagesQuery() {
       receivedMessages: Message[];
       sentMessages: Message[];
     }> => {
-      console.log("user userMessagesQuery", address);
       if (!address) {
         return { receivedMessages: [], sentMessages: [] };
       }
@@ -428,7 +431,20 @@ export function useUserMessagesQuery() {
         received.map(async (rec) => {
           const message = await getMessage({ messageId: rec });
 
-          return message;
+          const updatedIpfsHash = message.contentIPFSHash.startsWith("ipfs://")
+            ? message.contentIPFSHash
+            : `ipfs://${message.contentIPFSHash}`;
+
+          const ipfsContent = await getIpfsContent({
+            contentIPFSHash: updatedIpfsHash,
+          });
+
+          const fullMessage = {
+            ...message,
+            ipfsContent,
+          };
+
+          return fullMessage;
         })
       );
 
@@ -436,7 +452,19 @@ export function useUserMessagesQuery() {
         sent.map(async (sen) => {
           const message = await getMessage({ messageId: sen });
 
-          return message;
+          const updatedIpfsHash = message.contentIPFSHash.startsWith("ipfs://")
+            ? message.contentIPFSHash
+            : `ipfs://${message.contentIPFSHash}`;
+
+          const ipfsContent = await getIpfsContent({
+            contentIPFSHash: updatedIpfsHash,
+          });
+
+          const fullMessage = {
+            ...message,
+            ipfsContent,
+          };
+          return fullMessage;
         })
       );
 
@@ -450,6 +478,31 @@ export function useUserMessagesQuery() {
   });
 }
 
+export async function getIpfsContent({
+  contentIPFSHash,
+}: {
+  contentIPFSHash: string;
+}) {
+  const ipfsDownload = await download({
+    client,
+    uri: contentIPFSHash,
+  });
+
+  const typedIpfs: IPFSDownload = {
+    ok: ipfsDownload.ok,
+    status: ipfsDownload.status,
+    redirected: ipfsDownload.redirected,
+    statusText: ipfsDownload.statusText,
+    type: ipfsDownload.type,
+    url: ipfsDownload.url,
+  };
+
+  const ipfsUrlContent = await axios.get<MessageMetadata>(typedIpfs.url);
+  const ipfsUrlContentResponse = ipfsUrlContent.data;
+
+  return ipfsUrlContentResponse;
+}
+
 type Message = {
   sender: string;
   receiver: string;
@@ -459,4 +512,14 @@ type Message = {
   isEncrypted: boolean;
   senderUsername: string;
   receiverUsername: string;
+  ipfsContent: MessageMetadata;
+};
+
+type IPFSDownload = {
+  ok: boolean;
+  status: number;
+  redirected: boolean;
+  statusText: string;
+  type: string;
+  url: string;
 };
